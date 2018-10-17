@@ -31,6 +31,7 @@
             android:layout_height="match_parent"
             android:layout_centerHorizontal="true"/>
         <ImageView
+            android:id="@+id/setting"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/setting"
@@ -66,13 +67,16 @@
             android:layout_alignParentTop="true"
             android:layout_toLeftOf="@+id/bottomCenter"
             android:backgroundTint="@color/blue"/>
+
         <ImageView
+            android:id="@+id/compare"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/compare"
             android:layout_alignParentTop="true"
+            android:layout_toEndOf="@+id/bottomCenter"
             android:layout_toRightOf="@+id/bottomCenter"
-            android:backgroundTint="@color/blue"/>
+            android:background="@drawable/compare"
+            android:backgroundTint="@color/blue" />
     </RelativeLayout>
 
 </LinearLayout>

@@ -4,4 +4,8 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="Photo">Photo</string>
     <string name="Folder">Folder</string>
+    <string name="noBluetooth">Bluetooth is no available on this phone.</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

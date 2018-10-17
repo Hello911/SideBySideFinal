@@ -30,6 +30,12 @@ dependencies {
     implementation 'com.android.support:design:23.3.0'
     /*graph view lib*/
     implementation 'com.jjoe64:graphview:4.2.2'
+    /*Bluetooth library*/
+    implementation 'com.akexorcist:bluetoothspp:1.0.0'
+    //GoodieBag CarouselPicker
+    implementation 'com.github.GoodieBag:CarouselPicker:v1.1'
+    //FAB
+    implementation 'com.android.support:design:26.1.0'
 }
 
 configurations.all {
