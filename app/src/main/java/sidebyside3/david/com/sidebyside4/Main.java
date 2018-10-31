@@ -1,6 +1,7 @@
 package sidebyside3.david.com.sidebyside4;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaScannerConnection;
@@ -29,9 +30,11 @@ import java.util.Date;
 public class Main extends AppCompatActivity implements View.OnClickListener{
     static final int  CAMERA=1;
     ImageView camera,edit,setting,compare;
-    TextView folder;
+    TextView folder,dailyPhotos;
     File mCurrentPhotoFile;
     Uri imageUri;
+    SharedPreferences pref;
+    SharedPreferences.Editor editor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,11 +55,50 @@ public class Main extends AppCompatActivity implements View.OnClickListener{
         folder=(TextView)findViewById(R.id.folder);
         folder.setOnClickListener(this);
 
+        dailyPhotos=(TextView)findViewById(R.id.dailyPhotos);
+
         setting=(ImageView)findViewById(R.id.setting);
         setting.setOnClickListener(this);
 
         compare=(ImageView)findViewById(R.id.compare);
         compare.setOnClickListener(this);
+
+        pref=getApplicationContext().getSharedPreferences("photoNum",MODE_PRIVATE);
+        editor=pref.edit();
+
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        //refresh total photo count after returning from camera Intent
+        File dir=new File("/sdcard/DCIM/raspberry");
+        File[] files=dir.listFiles();
+        int numOfFiles=files.length;
+        folder.setText(numOfFiles+" photos in Folder");
+        //to refresh daily photo taken after returning from camera Intent
+        int num=pref.getInt("photos", 0);
+
+
+        Calendar cal=Calendar.getInstance();
+        int today=cal.get(Calendar.DAY_OF_MONTH);
+        int dayLastSaved=pref.getInt("day",0);
+        if(today==dayLastSaved){
+
+        }else{
+            num=0;
+        }
+
+        switch(num){
+            case 0:
+                dailyPhotos.setText("No photo taken today");
+                break;
+            case 1:
+                dailyPhotos.setText("1 photo taken today");
+                break;
+            default:
+                dailyPhotos.setText(num+" photos taken today");
+        }
     }
 
     @Override
@@ -119,6 +161,21 @@ public class Main extends AppCompatActivity implements View.OnClickListener{
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode==CAMERA && resultCode==RESULT_OK){
+            Calendar cal=Calendar.getInstance();
+            int today=cal.get(Calendar.DAY_OF_MONTH);
+            int dayLastSaved=pref.getInt("day",0);
+            //every time a photo is saved, increment num to keep track daily photo number
+            int num=pref.getInt("photos",0);
+            if(dayLastSaved==today){
+                num++;
+            }else{
+                num=1;
+            }
+            editor.putInt("photos", num);
+            //every time a photo was saved, put today's date into "day"
+            editor.putInt("day",today);//
+            editor.apply();
+
             MediaScannerConnection.scanFile(this,
                     new String[]{mCurrentPhotoFile.getPath()},
                     null,

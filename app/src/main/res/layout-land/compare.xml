@@ -23,11 +23,25 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_toLeftOf="@+id/vertical_divider">
+            <!--This button is here to avoid NullPointerException-->
+            <Button
+                android:visibility="invisible"
+                android:id="@+id/enableZooming1"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="enable touch"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="20dp"
+                android:background="@color/blackTrans"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"/>
             <ImageView
                 android:id="@+id/photo1"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scaleType="matrix"/>
+                android:scaleType="centerInside"/>
             <in.goodiebag.carouselpicker.CarouselPicker
                 android:id="@+id/data1"
                 android:layout_width="wrap_content"
@@ -40,11 +54,25 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_toRightOf="@+id/vertical_divider">
+            <!--This button is here to avoid NullPointerException-->
+            <Button
+                android:visibility="invisible"
+                android:id="@+id/enableZooming2"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="enable touch"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="20dp"
+                android:background="@color/blackTrans"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"/>
             <ImageView
                 android:id="@+id/photo2"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scaleType="matrix" />
+                android:scaleType="centerInside" />
             <in.goodiebag.carouselpicker.CarouselPicker
                 android:id="@+id/data2"
                 android:layout_width="wrap_content"
@@ -128,6 +156,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/photo"
+            android:layout_marginBottom="10dp"/>
+        <ImageView
+            android:id="@+id/enableZoomingLandscape1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/touch"
+            android:layout_marginBottom="10dp"/>
+        <ImageView
+            android:id="@+id/enableZoomingLandscape2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/touch"
             android:layout_marginBottom="10dp"/>
     </LinearLayout>
 

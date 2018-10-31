@@ -3,15 +3,25 @@ package sidebyside3.david.com.sidebyside4;
 import android.annotation.TargetApi;
 import android.app.Activity;
 
+import android.content.ClipData;
+import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
 
+import android.os.Environment;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.FileProvider;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -25,23 +35,31 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.channels.FileChannel;
 import java.nio.file.Path;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.logging.Logger;
 
 public class Folder extends Activity implements AdapterView.OnItemClickListener
         ,View.OnClickListener{
-    int SELECT_MULTIPLE=911;
     List<GridViewItem> gridItems;
     List<String> toCompare;
     MyGridAdapter adp;
     GridView gridView;
     FloatingActionButton but;
+
+    //Import
+    int PICK_IMAGE_MULTIPLE = 1;
+    String imageEncoded;
+    List<String> imagesEncodedList;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,10 +69,11 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
         toCompare = new ArrayList<>();
         setGridAdapter("/sdcard/DCIM/raspberry");
     }
+
     @Override
     public void onClick(View view) {
         switch(view.getId()){
-            case R.id.button+1:
+            case R.id.button+1://changes the button ID to make it Compare
                 if(toCompare.size()==2){
                     Intent comparePhotos=new Intent(this,Compare.class);
                     comparePhotos.putExtra("photo1",toCompare.get(0));
@@ -65,52 +84,149 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
                 }
                 break;
             case R.id.button:
-                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT
+                    , MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 intent.setType("image/*"); //allows any image file type. Change * to specific extension to limit it
                 intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_MULTIPLE);
+                startActivityForResult(intent, PICK_IMAGE_MULTIPLE);
                 break;
         }
     }
-    @TargetApi(16)
+
+    @TargetApi(19)
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == SELECT_MULTIPLE) {
-            if(resultCode == Activity.RESULT_OK) {
-                ArrayList<Uri> selectedUris=new ArrayList<Uri>();
-                if(data.getClipData() != null) {
-                    int count = data.getClipData().getItemCount();
-                    for(int i = 0; i < count; i++){
-                        Uri imageUri = data.getClipData().getItemAt(i).getUri();
-                        //selectedUris.add(imageUri);
-                        File f = new File(imageUri.getPath());
-                        Bitmap image = BitmapFactory.decodeFile(f.getPath());
-                        FileOutputStream out = null;
-                        try {
-                            out = new FileOutputStream("/sdcard/DCIM/raspberry/" + f.getName());
-                            image.compress(Bitmap.CompressFormat.PNG, 100, out);
-                        } catch (FileNotFoundException e) {
-                            e.printStackTrace();
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        try{
+            if(requestCode==PICK_IMAGE_MULTIPLE && resultCode==RESULT_OK && data!=null){
+                imagesEncodedList=new ArrayList<String>();
+
+                if (data.getClipData() != null) {//when user pick many photos
+                    ClipData mClipData = data.getClipData();
+                    for (int i = 0; i < mClipData.getItemCount(); i++) {
+                        ClipData.Item item = mClipData.getItemAt(i);
+                        /**copied starts**/
+                        Uri selectedImage = item.getUri();
+                        String wholeID = DocumentsContract.getDocumentId(selectedImage);
+
+                        // Split at colon, use second item in the array
+                        String id = wholeID.split(":")[1];
+
+                        String[] column = {MediaStore.Images.Media.DATA};
+
+                        // where id is equal to
+                        String sel = MediaStore.Images.Media._ID + "=?";
+
+                        Cursor cursor = getContentResolver().
+                                query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                                        column, sel, new String[]{id}, null);
+
+                        String filePath = "";
+
+                        int columnIndex = cursor.getColumnIndex(column[0]);
+
+                        if (cursor.moveToFirst()) {
+                            filePath = cursor.getString(columnIndex);
                         }
-                        finally {
-                            if(out != null)
-                            {
-                                try {
-                                    out.close();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                            }
+                        cursor.close();
+                        /**copied ends**/
+                        imageEncoded = filePath;
+                        imagesEncodedList.add(i, imageEncoded);
+                    }
+                    for (int i = 0; i < imagesEncodedList.size(); i++) {
+                        //copy selected bitmap to another bitmap one at a time
+                        Bitmap bmp1 = BitmapFactory.decodeFile(imagesEncodedList.get(i));
+                        Bitmap bmp2 = bmp1.copy(bmp1.getConfig(), true);
+                        //store the newly made copy in another folder
+                        Calendar calendar = Calendar.getInstance();
+                        SimpleDateFormat sdformat = new SimpleDateFormat("MM_dd_yyyy_HH:mm:ss");
+                        String DateString = sdformat.format(calendar.getTime());
+                        try {
+                            File file = new File(getPublicDir(), "SideBySide4" + DateString + "_Copy_" + (i + 1) + ".jpg");
+                            FileOutputStream fos = new FileOutputStream(file);
+                            bmp2.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+                            fos.close();
+                            MediaScannerConnection.scanFile(this,
+                                    new String[]{file.getPath()},
+                                    null,
+                                    null);
+                            Toast.makeText(this,imagesEncodedList.size()+" photos successfully imported!", Toast.LENGTH_SHORT).show();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            Toast.makeText(this,imagesEncodedList.size()+" photos NOT imported", Toast.LENGTH_SHORT).show();
                         }
                     }
-                }
-            } else if(data.getData() != null) {
-                String imagePath = data.getData().getPath();
-                //do something with the image (save it to some directory or whatever you need to do with it here)
-            }
-        }
 
+                }else{//when user picks 1 photo
+                    if(data.getData()!=null){
+                        /**copied starts**/
+                        Uri selectedImage = data.getData();
+                        String wholeID = DocumentsContract.getDocumentId(selectedImage);
+
+                        // Split at colon, use second item in the array
+                        String id = wholeID.split(":")[1];
+
+                        String[] column = { MediaStore.Images.Media.DATA };
+
+                        // where id is equal to
+                        String sel = MediaStore.Images.Media._ID + "=?";
+
+                        Cursor cursor = getContentResolver().
+                                query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                                        column, sel, new String[]{ id }, null);
+
+                        String filePath = "";
+
+                        int columnIndex = cursor.getColumnIndex(column[0]);
+
+                        if (cursor.moveToFirst()) {
+                            filePath = cursor.getString(columnIndex);
+                        }
+                        cursor.close();
+                        /**copied ends**/
+                        imageEncoded=filePath;
+                        cursor.close();
+                        Bitmap bmp1=BitmapFactory.decodeFile(imageEncoded);
+                        Bitmap bmp2=bmp1.copy(bmp1.getConfig(),true);
+                        //store the newly made copy in another folder
+                        Calendar calendar=Calendar.getInstance();
+                        SimpleDateFormat sdformat=new SimpleDateFormat("MM_dd_yyyy_HH:mm:ss");
+                        String DateString=sdformat.format(calendar.getTime());
+                        try {
+                            File file = new File(getPublicDir(), "SideBySide4"+ DateString +"_Copy_1.jpg");
+                            FileOutputStream fos = new FileOutputStream(file);
+                            bmp2.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+                            fos.close();
+                            MediaScannerConnection.scanFile(this,
+                                    new String[]{file.getPath()},
+                                    null,
+                                    null);
+                            Toast.makeText(this,"1 photo successfully imported!", Toast.LENGTH_SHORT).show();
+                        }catch(IOException e){
+                            e.printStackTrace();
+                            Toast.makeText(this,"1 photo import FAILED", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }//if else ends
+
+            }
+        }catch(Exception e){
+            Toast.makeText(this, e.toString(),Toast.LENGTH_LONG).show();
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+
+    /**
+     *Return raspberry folder if no such folder create one
+     *
+     */
+    public File getPublicDir() {
+        // Get the directory for the user's public pictures directory.
+        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "raspberry");
+        if (!file.mkdirs()) {
+            Log.e("PUBLIC DIRECTORY", "Directory not created");
+        }
+        return file;
     }
 
     /**

@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -13,6 +14,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.media.ExifInterface;
+import android.media.Image;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
@@ -27,6 +29,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -62,7 +65,6 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
     ImageView rotatePhoto2;
     RelativeLayout viewGroup;
     RelativeLayout viewGroupLandscape;
-    File imageFile;
     File file;//file path of the collage last taken
     Bitmap viewBitmap;
     private final int PICK_PHOTO1 = 1;
@@ -99,6 +101,13 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
     String[] dataArray1;
     String[] dataArray2;
 
+    Button enableZooming1;
+    Button enableZooming2;
+    Boolean isEnabled1=false;
+    Boolean isEnabled2=false;
+    //landscape equivalent of enableZooming but is instead imageView
+    ImageView enableZoomingLandscape1;
+    ImageView enableZoomingLandscape2;
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -197,7 +206,7 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
             //reading photo1 Exif data for photo1Path
             uri2= getImageContentUri(this, new File(photo2Path));
             String dataString2=getDataString(uri2);
-            if(dataString1!=null) {//this if else structure is to prevent empty String[] for photos w/o data
+            if(dataString2!=null) {//this if else structure is to prevent empty String[] for photos w/o data
                 dataArray2 = dataString2.split("\\s+");
             }else{
                 dataString2="0 0 0";
@@ -217,6 +226,15 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
             }
 
         }
+
+        enableZooming1=(Button)findViewById(R.id.enableZooming1);
+        enableZooming1.setOnClickListener(this);
+        enableZooming2=(Button)findViewById(R.id.enableZooming2);
+        enableZooming2.setOnClickListener(this);
+        enableZoomingLandscape1=(ImageView)findViewById(R.id.enableZoomingLandscape1);
+        enableZoomingLandscape1.setOnClickListener(this);
+        enableZoomingLandscape2=(ImageView)findViewById(R.id.enableZoomingLandscape2);
+        enableZoomingLandscape2.setOnClickListener(this);
     }
 
     /**
@@ -278,6 +296,7 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
      * triggered when either imageview is clicked. Differentiated by imageview.ID
      * @param v which imageview is click
      */
+    @TargetApi(21)
     @Override
     public void onClick(View v){
         switch(v.getId()){
@@ -384,6 +403,51 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
             case R.id.selectPhoto2:
                 Intent pickPhoto2 = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 startActivityForResult(pickPhoto2, PICK_PHOTO2);
+                break;
+            case R.id.enableZooming1:
+                if(isEnabled1){
+                    photo1.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                    isEnabled1=false;
+                    enableZooming1.setText("enable touch");
+                }else{//if touching is turned off. state=false
+                    photo1.setScaleType(ImageView.ScaleType.MATRIX);
+                    isEnabled1=true;
+                    enableZooming1.setText("disable touch");
+                }
+                break;
+            case R.id.enableZooming2:
+                if(isEnabled2){
+                    photo2.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                    isEnabled2=false;
+                    enableZooming2.setText("enable touch");
+                }else{//if touching is turned off. state=false
+                    photo2.setScaleType(ImageView.ScaleType.MATRIX);
+                    isEnabled2=true;
+                    enableZooming2.setText("disable touch");
+                }
+                break;
+            case R.id.enableZoomingLandscape1:
+                if(isEnabled1){
+                    photo1.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                    isEnabled1=false;
+                    enableZoomingLandscape1.setColorFilter(getResources().getColor(R.color.deepBlack));
+                }else{//if touching is turned off. state=false
+                    photo1.setScaleType(ImageView.ScaleType.MATRIX);
+                    isEnabled1=true;
+                    enableZoomingLandscape1.setColorFilter(getResources().getColor(R.color.white));
+                }
+                break;
+            case R.id.enableZoomingLandscape2:
+                if(isEnabled2){
+                    photo2.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                    isEnabled2=false;
+                    enableZoomingLandscape2.setColorFilter(getResources().getColor(R.color.deepBlack));
+                }else{//if touching is turned off. state=false
+                    photo2.setScaleType(ImageView.ScaleType.MATRIX);
+                    isEnabled2=true;
+                    enableZoomingLandscape2.setColorFilter(getResources().getColor(R.color.white));
+                }
+                break;
         }
     }
 
@@ -605,24 +669,6 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
         return formatter.format(d);
     }
 
-    /**
-     *
-     * @param photoUri photo to get the description of
-     * @return whatever you type into info, photo description
-     */
-    @TargetApi(25)
-    public String getDescription(Uri photoUri){
-        InputStream in;
-        String description="location";
-        try{
-            in=getContentResolver().openInputStream(photoUri);
-            ExifInterface exifInterface=new ExifInterface(in);
-            description=exifInterface.getAttribute(ExifInterface.TAG_SUBJECT_LOCATION);
-        }catch(IOException e){
-            e.printStackTrace();
-        }
-        return description;
-    }
 
     /**
      *

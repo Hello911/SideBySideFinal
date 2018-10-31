@@ -2,16 +2,19 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
     <TextView
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
-        android:text="Muscle sensor"
+        android:text="Notifications"
         android:textColor="@color/blue"
         android:textSize="15dp" />
+
+
     <TextView
-        android:id="@+id/bluetooth"
+        android:id="@+id/label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
@@ -19,50 +22,57 @@
         android:layout_marginBottom="10dp"
         android:layout_marginLeft="10dp"
         android:layout_marginTop="10dp"
-        android:text="Bluetooth"
+        android:text="Daily notification"
         android:textColor="#FFF"
         android:textSize="20dp" />
 
     <Switch
-        android:id="@+id/bluetoothSwitch"
+        android:id="@+id/SwitchID"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_alignTop="@+id/bluetooth"
+        android:layout_alignTop="@+id/label"
         android:layout_marginRight="10dp"
         android:checked="true"/>
+
+
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_below="@+id/bluetooth"
-        android:background="#D3D3D3" />
+        android:layout_below="@+id/label"
+        android:background="@color/grey"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"/>
+
     <LinearLayout
         android:id="@+id/btn_time"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/bluetooth"
+        android:layout_below="@+id/label"
         android:onClick="showTimePickerDialog"
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/chooseDevice"
+            android:id="@+id/labelTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:layout_marginTop="10dp"
-            android:text="Connect to device"
+            android:text="Set time"
             android:textColor="#FFF"
             android:textSize="20dp" />
 
         <TextView
-            android:id="@+id/connectedDevices"
+            android:id="@+id/in_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
             android:layout_marginLeft="10dp"
             android:layout_marginTop="-5dp"
-            android:text="connected device"
-            android:textSize="15dp" />
+            android:text="time"
+            android:textSize="15dp"
+            android:textColor="@color/blue"/>
 
     </LinearLayout>
+
 </RelativeLayout>

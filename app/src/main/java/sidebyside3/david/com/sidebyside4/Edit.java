@@ -61,7 +61,7 @@ import in.goodiebag.carouselpicker.CarouselPicker;
 public class Edit extends AppCompatActivity implements View.OnTouchListener, View.OnClickListener{
     ImageView photo;
     Button enableZooming;
-    boolean isEnabled=false;
+    boolean isEnabled=false;//for changing the scaleType of photo
     private final int PICK_PHOTO = 1;
     CarouselPicker carouselPicker;
     String dataArray[];
@@ -129,6 +129,7 @@ public class Edit extends AppCompatActivity implements View.OnTouchListener, Vie
     Future futureThread;
     Handler mHandler=new Handler();
     private LineGraphSeries<DataPoint> mSeries1;
+    private int[] voltagePts=new int[40];
     private double lastTime=0;
     /**
      * What happen when a button in toolbar is clicked
@@ -190,21 +191,6 @@ public class Edit extends AppCompatActivity implements View.OnTouchListener, Vie
                         @Override
                         public void onDeviceConnected(String name, String address) {
                             strength.setText("Connected to "+name);
-                            //start showing the graph
-                            mTimer1 = new Runnable() {
-                                @Override
-                                public void run() {
-                                    lastTime+=1;
-                                    String BtMessage=strength.getText().toString();
-                                    String voltageString=BtMessage.substring(1,BtMessage.length()-1);
-                                    int voltage=Integer.parseInt(voltageString);
-                                    mSeries1.appendData(new DataPoint(lastTime, voltage), true, 40);
-                                    mHandler.postDelayed(this, 200);//how long before a new pt is added
-                                }
-                            };
-                            mHandler.postDelayed(mTimer1, 2000);//how long to wait before the graph starts graphing
-                            //You wait 2 sec so "Connected to HC06" will be skipped and not be converted to integer.
-                            futureThread=threadKiller.submit(mTimer1);
                         }
                         @Override
                         public void onDeviceDisconnected() {
@@ -232,7 +218,7 @@ public class Edit extends AppCompatActivity implements View.OnTouchListener, Vie
                     });
                     //To receive data
                     spp.setOnDataReceivedListener(new BluetoothSPP.OnDataReceivedListener() {
-                        public void onDataReceived(byte[] data, String message) {
+                        public void onDataReceived(byte[] data, final String message) {
                             strength.setText(message);
                         }
                     });
