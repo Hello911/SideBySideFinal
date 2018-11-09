@@ -1,17 +1,21 @@
 package sidebyside3.david.com.sidebyside4;
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 
 import android.content.ClipData;
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.media.ExifInterface;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
@@ -20,6 +24,8 @@ import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.view.View;
@@ -30,6 +36,7 @@ import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -45,8 +52,10 @@ import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 public class Folder extends Activity implements AdapterView.OnItemClickListener
         ,View.OnClickListener{
@@ -67,7 +76,14 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
         but = (FloatingActionButton)findViewById(R.id.button);
         but.setOnClickListener(this);
         toCompare = new ArrayList<>();
-        setGridAdapter("/sdcard/DCIM/raspberry");
+        if(ContextCompat.checkSelfPermission(this
+                , Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
+            Toast.makeText(this,"Enable permission in Setting->App",Toast.LENGTH_SHORT).show();
+
+        }else{
+            setGridAdapter("/sdcard/DCIM/raspberry");
+        }
     }
 
     @Override
@@ -98,7 +114,6 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         try{
             if(requestCode==PICK_IMAGE_MULTIPLE && resultCode==RESULT_OK && data!=null){
-                imagesEncodedList=new ArrayList<String>();
 
                 if (data.getClipData() != null) {//when user pick many photos
                     ClipData mClipData = data.getClipData();
@@ -116,9 +131,11 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
                         // where id is equal to
                         String sel = MediaStore.Images.Media._ID + "=?";
 
-                        Cursor cursor = getContentResolver().
-                                query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                                        column, sel, new String[]{id}, null);
+                        Cursor cursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                                                                    , column
+                                                                    , sel
+                                                                    , new String[]{id}
+                                                                    , null);
 
                         String filePath = "";
 
@@ -127,21 +144,23 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
                         if (cursor.moveToFirst()) {
                             filePath = cursor.getString(columnIndex);
                         }
-                        cursor.close();
+
                         /**copied ends**/
-                        imageEncoded = filePath;
-                        imagesEncodedList.add(i, imageEncoded);
-                    }
-                    for (int i = 0; i < imagesEncodedList.size(); i++) {
-                        //copy selected bitmap to another bitmap one at a time
-                        Bitmap bmp1 = BitmapFactory.decodeFile(imagesEncodedList.get(i));
+                        //gets the date of the original photo and later store it in the DATE column of the copy
+                        File originalFile=new File(filePath);
+                        Date d=new Date(originalFile.lastModified());
+                        SimpleDateFormat exifFormatter=new SimpleDateFormat("MM/dd/yyyy");
+                        String exifDate=exifFormatter.format(d);
+
+                        Bitmap bmp1 = BitmapFactory.decodeFile(filePath);
                         Bitmap bmp2 = bmp1.copy(bmp1.getConfig(), true);
                         //store the newly made copy in another folder
                         Calendar calendar = Calendar.getInstance();
                         SimpleDateFormat sdformat = new SimpleDateFormat("MM_dd_yyyy_HH:mm:ss");
                         String DateString = sdformat.format(calendar.getTime());
+                        File file=null;
                         try {
-                            File file = new File(getPublicDir(), "SideBySide4" + DateString + "_Copy_" + (i + 1) + ".jpg");
+                            file = new File(getPublicDir(), "SideBySide4" + DateString + "_Copy_" + (i + 1) + ".jpg");
                             FileOutputStream fos = new FileOutputStream(file);
                             bmp2.compress(Bitmap.CompressFormat.JPEG, 100, fos);
                             fos.close();
@@ -149,10 +168,19 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
                                     new String[]{file.getPath()},
                                     null,
                                     null);
-                            Toast.makeText(this,imagesEncodedList.size()+" photos successfully imported!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this,mClipData.getItemCount()+" photos successfully imported!", Toast.LENGTH_SHORT).show();
                         } catch (IOException e) {
                             e.printStackTrace();
-                            Toast.makeText(this,imagesEncodedList.size()+" photos NOT imported", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this,mClipData.getItemCount()+" photos NOT imported", Toast.LENGTH_SHORT).show();
+                        }
+                        try{
+                            ExifInterface exifInterface = new ExifInterface(file.getCanonicalPath());
+                            exifInterface.setAttribute(ExifInterface.TAG_DATETIME, exifDate);
+                            exifInterface.saveAttributes();
+                            Toast.makeText(this, "Data successfully saved!", Toast.LENGTH_SHORT).show();
+                        }catch(IOException e){
+                            e.printStackTrace();
+                            Toast.makeText(this, "Oops, an error prevents saving: "+e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     }
 
@@ -183,16 +211,22 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
                         }
                         cursor.close();
                         /**copied ends**/
-                        imageEncoded=filePath;
+                        //gets the date of the original photo and later store it in the DATE column of the copy
+                        File originalFile=new File(filePath);
+                        Date d=new Date(originalFile.lastModified());
+                        SimpleDateFormat exifFormatter=new SimpleDateFormat("MM/dd/yyyy");
+                        String exifDate=exifFormatter.format(d);
+
                         cursor.close();
-                        Bitmap bmp1=BitmapFactory.decodeFile(imageEncoded);
+                        Bitmap bmp1=BitmapFactory.decodeFile(filePath);
                         Bitmap bmp2=bmp1.copy(bmp1.getConfig(),true);
                         //store the newly made copy in another folder
                         Calendar calendar=Calendar.getInstance();
                         SimpleDateFormat sdformat=new SimpleDateFormat("MM_dd_yyyy_HH:mm:ss");
                         String DateString=sdformat.format(calendar.getTime());
+                        File file=null;
                         try {
-                            File file = new File(getPublicDir(), "SideBySide4"+ DateString +"_Copy_1.jpg");
+                            file = new File(getPublicDir(), "SideBySide4"+ DateString +"_Copy_1.jpg");
                             FileOutputStream fos = new FileOutputStream(file);
                             bmp2.compress(Bitmap.CompressFormat.JPEG, 100, fos);
                             fos.close();
@@ -201,9 +235,18 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
                                     null,
                                     null);
                             Toast.makeText(this,"1 photo successfully imported!", Toast.LENGTH_SHORT).show();
+                        }catch(IOException e) {
+                            e.printStackTrace();
+                            Toast.makeText(this, "1 photo import FAILED", Toast.LENGTH_SHORT).show();
+                        }
+                        try{
+                            ExifInterface exifInterface = new ExifInterface(file.getCanonicalPath());
+                            exifInterface.setAttribute(ExifInterface.TAG_DATETIME, exifDate);
+                            exifInterface.saveAttributes();
+                            Toast.makeText(this, "Data successfully saved!", Toast.LENGTH_SHORT).show();
                         }catch(IOException e){
                             e.printStackTrace();
-                            Toast.makeText(this,"1 photo import FAILED", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, "Oops, an error prevents saving: "+e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     }
                 }//if else ends
@@ -353,6 +396,19 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
                 return true;
             }
             return false;
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults){
+        switch(requestCode){
+            case 1:{
+                if(grantResults.length>0&&grantResults[0]==PackageManager.PERMISSION_GRANTED){
+                    setGridAdapter("/sdcard/DCIM/raspberry");
+                }else{
+
+                }
+            }
         }
     }
 }

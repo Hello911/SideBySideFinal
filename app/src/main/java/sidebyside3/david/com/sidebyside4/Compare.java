@@ -32,6 +32,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
@@ -56,6 +57,8 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
     Uri uri2;
     ImageView photo1;
     ImageView photo2;
+    TextView photo1text;
+    TextView photo2text;
     ImageView selectPhoto1;
     ImageView selectPhoto2;
     ImageView saveCollage;
@@ -117,9 +120,12 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
         viewGroupLandscape=(RelativeLayout)findViewById(R.id.mainView);
         photo1 = (ImageView) findViewById(R.id.photo1);
         photo2 = (ImageView) findViewById(R.id.photo2);
-        photo1.setOnTouchListener(this);
-        photo2.setOnTouchListener(this);
 
+        photo1.setOnClickListener(this);
+        photo2.setOnClickListener(this);
+
+        photo1text=(TextView)findViewById(R.id.photo1text);
+        photo2text=(TextView)findViewById(R.id.photo2text);
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
@@ -404,15 +410,27 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
                 Intent pickPhoto2 = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 startActivityForResult(pickPhoto2, PICK_PHOTO2);
                 break;
+            case R.id.photo1:
+                pickPhoto1 = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(pickPhoto1, PICK_PHOTO1);
+                break;
+            case R.id.photo2:
+                pickPhoto2 = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(pickPhoto2, PICK_PHOTO2);
+                break;
             case R.id.enableZooming1:
                 if(isEnabled1){
                     photo1.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
                     isEnabled1=false;
                     enableZooming1.setText("enable touch");
-                }else{//if touching is turned off. state=false
+                    photo1.setOnClickListener(this);
+                    photo1.setOnTouchListener(null);
+                }else{//if touching is turned off. state=false, now enable it
                     photo1.setScaleType(ImageView.ScaleType.MATRIX);
                     isEnabled1=true;
                     enableZooming1.setText("disable touch");
+                    photo1.setOnClickListener(null);
+                    photo1.setOnTouchListener(this);
                 }
                 break;
             case R.id.enableZooming2:
@@ -420,10 +438,14 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
                     photo2.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
                     isEnabled2=false;
                     enableZooming2.setText("enable touch");
+                    photo2.setOnClickListener(this);
+                    photo1.setOnTouchListener(null);
                 }else{//if touching is turned off. state=false
                     photo2.setScaleType(ImageView.ScaleType.MATRIX);
                     isEnabled2=true;
                     enableZooming2.setText("disable touch");
+                    photo2.setOnClickListener(null);
+                    photo2.setOnTouchListener(this);
                 }
                 break;
             case R.id.enableZoomingLandscape1:
@@ -431,10 +453,14 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
                     photo1.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
                     isEnabled1=false;
                     enableZoomingLandscape1.setColorFilter(getResources().getColor(R.color.deepBlack));
+                    photo1.setOnClickListener(this);
+                    photo1.setOnTouchListener(null);
                 }else{//if touching is turned off. state=false
                     photo1.setScaleType(ImageView.ScaleType.MATRIX);
                     isEnabled1=true;
                     enableZoomingLandscape1.setColorFilter(getResources().getColor(R.color.white));
+                    photo1.setOnClickListener(null);
+                    photo1.setOnTouchListener(this);
                 }
                 break;
             case R.id.enableZoomingLandscape2:
@@ -442,10 +468,14 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
                     photo2.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
                     isEnabled2=false;
                     enableZoomingLandscape2.setColorFilter(getResources().getColor(R.color.deepBlack));
+                    photo2.setOnClickListener(this);
+                    photo2.setOnTouchListener(null);
                 }else{//if touching is turned off. state=false
                     photo2.setScaleType(ImageView.ScaleType.MATRIX);
                     isEnabled2=true;
                     enableZoomingLandscape2.setColorFilter(getResources().getColor(R.color.white));
+                    photo2.setOnClickListener(null);
+                    photo2.setOnTouchListener(this);
                 }
                 break;
         }
@@ -481,7 +511,8 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
         super.onActivityResult(requestCode, resultCode, data);
         //display the 1st select photo, and its data
         if (requestCode == PICK_PHOTO1 && resultCode == RESULT_OK && data != null && data.getData() != null) {
-
+            photo1text.setText("");//after a photo is pick, make "Select Photo" disappear
+            photo2text.setText("");
             uri1 = data.getData();
             //reading photo1 Exif data
             String dataString1=getDataString(uri1);

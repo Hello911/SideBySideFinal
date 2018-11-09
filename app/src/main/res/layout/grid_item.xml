@@ -10,4 +10,9 @@
         android:scaleType="centerCrop"
         android:layout_margin="5dp">
     </ImageView>
+    <TextView
+        android:id="@+id/date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/blackTrans"/>
 </RelativeLayout>

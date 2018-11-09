@@ -1,13 +1,17 @@
 package sidebyside3.david.com.sidebyside4;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -74,7 +78,12 @@ public class Main extends AppCompatActivity implements View.OnClickListener{
         //refresh total photo count after returning from camera Intent
         File dir=new File("/sdcard/DCIM/raspberry");
         File[] files=dir.listFiles();
-        int numOfFiles=files.length;
+        int numOfFiles;
+        if(files!=null){
+            numOfFiles=files.length;
+        }else{
+            numOfFiles=0;
+        }
         folder.setText(numOfFiles+" photos in Folder");
         //to refresh daily photo taken after returning from camera Intent
         int num=pref.getInt("photos", 0);
@@ -100,15 +109,37 @@ public class Main extends AppCompatActivity implements View.OnClickListener{
                 dailyPhotos.setText(num+" photos taken today");
         }
     }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults){
+        switch(requestCode){
+            case 1:{
+                if(grantResults.length>0&&grantResults[0]==PackageManager.PERMISSION_GRANTED){
+                    try {
+                        dispatchTakePictureIntent();
+                    } catch (IOException e){
+
+                    }
+                }else{
+
+                }
+            }
+        }
+    }
 
     @Override
     public void onClick(View v){
         switch(v.getId()) {
             case R.id.camera:
-                try {
-                    dispatchTakePictureIntent();
-                } catch (IOException e){
+                if(ContextCompat.checkSelfPermission(this
+                        , Manifest.permission.CAMERA)!= PackageManager.PERMISSION_GRANTED){
+                    ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CAMERA},1);
+                    Toast.makeText(this,"Enable permission in Setting->App",Toast.LENGTH_SHORT).show();
+                }else{
+                    try {
+                        dispatchTakePictureIntent();
+                    } catch (IOException e){
 
+                    }
                 }
                 break;
             case R.id.folder:

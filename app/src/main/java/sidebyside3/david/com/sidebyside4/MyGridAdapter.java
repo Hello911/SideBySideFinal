@@ -2,15 +2,21 @@ package sidebyside3.david.com.sidebyside4;
 
 
 import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.Uri;
+import android.provider.MediaStore;
+import android.support.v4.content.FileProvider;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.io.File;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -24,9 +30,11 @@ public class MyGridAdapter extends BaseAdapter {
 
     LayoutInflater inflater;
     List<GridViewItem> items;
+    Context mContext;
 
 
     public MyGridAdapter(Context context, List<GridViewItem> items) {
+        mContext=context;
         this.items = items;
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
@@ -60,7 +68,9 @@ public class MyGridAdapter extends BaseAdapter {
 
         ImageView imageView = (ImageView) convertView.findViewById(R.id.imageView);
         Bitmap image = items.get(position).getImage();
+        TextView date=(TextView) convertView.findViewById(R.id.date);
 
+        date.setText(getDate(items.get(position),mContext));
 
 
         if (image != null){
@@ -78,15 +88,8 @@ public class MyGridAdapter extends BaseAdapter {
         return convertView;
     }
 
-    private String getDate(GridViewItem g) {
-        File f = new File(g.getPath());
-        if(f.exists())
-        {
-            Date d = new Date(f.lastModified());
-            java.text.DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
-            return formatter.format(d);
-        }
-        return "";
+    private String getDate(GridViewItem g, Context context) {
+
     }
 
 }
