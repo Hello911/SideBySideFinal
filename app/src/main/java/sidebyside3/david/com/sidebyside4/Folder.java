@@ -82,7 +82,7 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
             Toast.makeText(this,"Enable permission in Setting->App",Toast.LENGTH_SHORT).show();
 
         }else{
-            setGridAdapter("/sdcard/DCIM/raspberry");
+            setGridAdapter(Environment.getExternalStorageDirectory()+"/DCIM/raspberry");
         }
     }
 
@@ -109,6 +109,8 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
         }
     }
 
+
+
     @TargetApi(19)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -132,10 +134,10 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
                         String sel = MediaStore.Images.Media._ID + "=?";
 
                         Cursor cursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                                                                    , column
-                                                                    , sel
-                                                                    , new String[]{id}
-                                                                    , null);
+                                , column
+                                , sel
+                                , new String[]{id}
+                                , null);
 
                         String filePath = "";
 
@@ -144,7 +146,7 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
                         if (cursor.moveToFirst()) {
                             filePath = cursor.getString(columnIndex);
                         }
-
+                        cursor.close();
                         /**copied ends**/
                         //gets the date of the original photo and later store it in the DATE column of the copy
                         File originalFile=new File(filePath);
@@ -182,6 +184,10 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
                             e.printStackTrace();
                             Toast.makeText(this, "Oops, an error prevents saving: "+e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
+                        //Finally, delete the original photo and refresh Folder
+                        originalFile.delete();
+                        sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(originalFile)));
+                        adp.notifyDataSetChanged();
                     }
 
                 }else{//when user picks 1 photo
@@ -217,7 +223,6 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
                         SimpleDateFormat exifFormatter=new SimpleDateFormat("MM/dd/yyyy");
                         String exifDate=exifFormatter.format(d);
 
-                        cursor.close();
                         Bitmap bmp1=BitmapFactory.decodeFile(filePath);
                         Bitmap bmp2=bmp1.copy(bmp1.getConfig(),true);
                         //store the newly made copy in another folder
@@ -248,6 +253,12 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
                             e.printStackTrace();
                             Toast.makeText(this, "Oops, an error prevents saving: "+e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
+                        //Finally, delete the original photo and refresh Folder
+                        originalFile.delete();
+                        sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(originalFile)));
+                        GridViewItem toAdd=new GridViewItem(file.toString(), false, bmp2,false,adp.getCount()-1);
+                        adp.add(toAdd);
+                        adp.notifyDataSetChanged();
                     }
                 }//if else ends
 

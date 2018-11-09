@@ -14,5 +14,6 @@
         android:id="@+id/date"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/blackTrans"/>
+        android:background="@color/blackTrans"
+        android:textSize="20sp"/>
 </RelativeLayout>
