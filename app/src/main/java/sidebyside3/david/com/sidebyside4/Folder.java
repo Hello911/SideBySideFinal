@@ -8,6 +8,7 @@ import android.content.ClipData;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -18,6 +19,7 @@ import android.graphics.Color;
 import android.media.ExifInterface;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import android.os.Environment;
@@ -76,6 +78,7 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
         but = (FloatingActionButton)findViewById(R.id.button);
         but.setOnClickListener(this);
         toCompare = new ArrayList<>();
+
         if(ContextCompat.checkSelfPermission(this
                 , Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
@@ -84,6 +87,8 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
         }else{
             setGridAdapter(Environment.getExternalStorageDirectory()+"/DCIM/raspberry");
         }
+        adp.sort();
+
     }
 
     @Override
@@ -151,8 +156,7 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
                         //gets the date of the original photo and later store it in the DATE column of the copy
                         File originalFile=new File(filePath);
                         Date d=new Date(originalFile.lastModified());
-                        SimpleDateFormat exifFormatter=new SimpleDateFormat("MM/dd/yyyy");
-                        String exifDate=exifFormatter.format(d);
+                        long millis=d.getTime();
 
                         Bitmap bmp1 = BitmapFactory.decodeFile(filePath);
                         Bitmap bmp2 = bmp1.copy(bmp1.getConfig(), true);
@@ -175,18 +179,19 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
                             e.printStackTrace();
                             Toast.makeText(this,mClipData.getItemCount()+" photos NOT imported", Toast.LENGTH_SHORT).show();
                         }
-                        try{
-                            ExifInterface exifInterface = new ExifInterface(file.getCanonicalPath());
-                            exifInterface.setAttribute(ExifInterface.TAG_DATETIME, exifDate);
-                            exifInterface.saveAttributes();
-                            Toast.makeText(this, "Data successfully saved!", Toast.LENGTH_SHORT).show();
-                        }catch(IOException e){
-                            e.printStackTrace();
-                            Toast.makeText(this, "Oops, an error prevents saving: "+e.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
+                        ContentValues mUpdateValues=new ContentValues();
+                        mUpdateValues.put(MediaStore.Images.Media.DATE_TAKEN,millis);
+                        int mRowsUpdated=getContentResolver().update(
+                                getImageContentUri(this,file)
+                                ,mUpdateValues
+                                ,null
+                                ,null
+                        );
                         //Finally, delete the original photo and refresh Folder
                         originalFile.delete();
                         sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(originalFile)));
+                        GridViewItem toAdd=new GridViewItem(file.toString(), false, bmp2,false,adp.getCount()-1);
+                        adp.add(toAdd);
                         adp.notifyDataSetChanged();
                     }
 
@@ -220,8 +225,7 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
                         //gets the date of the original photo and later store it in the DATE column of the copy
                         File originalFile=new File(filePath);
                         Date d=new Date(originalFile.lastModified());
-                        SimpleDateFormat exifFormatter=new SimpleDateFormat("MM/dd/yyyy");
-                        String exifDate=exifFormatter.format(d);
+                        Long millis=d.getTime();
 
                         Bitmap bmp1=BitmapFactory.decodeFile(filePath);
                         Bitmap bmp2=bmp1.copy(bmp1.getConfig(),true);
@@ -244,15 +248,17 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
                             e.printStackTrace();
                             Toast.makeText(this, "1 photo import FAILED", Toast.LENGTH_SHORT).show();
                         }
-                        try{
-                            ExifInterface exifInterface = new ExifInterface(file.getCanonicalPath());
-                            exifInterface.setAttribute(ExifInterface.TAG_DATETIME, exifDate);
-                            exifInterface.saveAttributes();
-                            Toast.makeText(this, "Data successfully saved!", Toast.LENGTH_SHORT).show();
-                        }catch(IOException e){
-                            e.printStackTrace();
-                            Toast.makeText(this, "Oops, an error prevents saving: "+e.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
+                        ContentValues mUpdateValues=new ContentValues();
+                        mUpdateValues.put(MediaStore.Images.Media.DATE_TAKEN,millis);
+                        int mRowsUpdated=getContentResolver().update(
+                                getImageContentUri(this,file)
+                                ,mUpdateValues
+                                ,null
+                                ,null
+                        );
+                        Date date=new Date(millis);
+                        java.text.DateFormat formatter=new SimpleDateFormat("MM/dd/yyyy");
+                        Log.i("date stored", formatter.format(date));
                         //Finally, delete the original photo and refresh Folder
                         originalFile.delete();
                         sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(originalFile)));
@@ -267,6 +273,29 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
             Toast.makeText(this, e.toString(),Toast.LENGTH_LONG).show();
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    public static Uri getImageContentUri(Context context, File imageFile) {
+        String filePath = imageFile.getAbsolutePath();
+        Cursor cursor = context.getContentResolver().query(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                new String[] { MediaStore.Images.Media._ID },
+                MediaStore.Images.Media.DATA + "=? ",
+                new String[] { filePath }, null);
+        if (cursor != null && cursor.moveToFirst()) {
+            int id = cursor.getInt(cursor.getColumnIndex(MediaStore.MediaColumns._ID));
+            cursor.close();
+            return Uri.withAppendedPath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "" + id);
+        } else {
+            if (imageFile.exists()) {
+                ContentValues values = new ContentValues();
+                values.put(MediaStore.Images.Media.DATA, filePath);
+                return context.getContentResolver().insert(
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+            } else {
+                return null;
+            }
+        }
     }
 
 
@@ -293,7 +322,6 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
         // Create a new grid adapter
         gridItems = createGridItems(path);
         adp = new MyGridAdapter(this, gridItems);
-
         // Set the grid adapter
         gridView = (GridView) findViewById(R.id.gridView);
         gridView.setAdapter(adp);
@@ -302,35 +330,16 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
         gridView.setOnItemClickListener(this);
     }
 
+    
 
     /**
      * Go through the specified directory, and create items to display in our
      * GridView
      */
     private List<GridViewItem> createGridItems(String directoryPath) {
-        List<GridViewItem> items = new ArrayList<GridViewItem>();
-
-        // List all the items within the folder.
-        File[] files = new File(directoryPath).listFiles();
-
-        for (int i = 0; i < files.length; i++) {
-            final File file = files[i];
-            // Add the directories containing images or sub-directories
-            if (file.isDirectory()
-                    && file.listFiles(new ImageFileFilter()).length > 0) {
-                items.add(new GridViewItem(file.getAbsolutePath(), true, null, false, i));
-            }
-            // Add the images
-            else {
-                Bitmap image = BitmapHelper.decodeBitmapFromFile(file.getAbsolutePath(),
-                        50,
-                        50);
-
-                items.add(new GridViewItem(file.getAbsolutePath(), false, image, false, i));
-            }
-        }
-
-        return items;
+        CreateItem task=new CreateItem(directoryPath);
+        task.execute();
+        return task.myMethod();
     }
 
 
@@ -386,7 +395,7 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
                     toCompare.add(item.getPath());
                     ViewGroup group=(ViewGroup)view;
                     ImageView image=(ImageView)group.getChildAt(0);
-                    image.setColorFilter(Color.argb(150,200,200,200));
+                    image.setColorFilter(Color.argb(150,0,128,255));
                 }
             }
         }

@@ -14,6 +14,7 @@ public class GridViewItem {
     private Bitmap image;
     private boolean isSelected;
     private int position;
+    private long millis;//date taken of this item photo
 
     public GridViewItem(String path, boolean isDirectory, Bitmap image, boolean isSelected, int position) {
         this.path = path;

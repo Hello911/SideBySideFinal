@@ -187,6 +187,8 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
         photo2.setImageBitmap(bitmap2);
 
         if(bitmap1!=null){//check so Comparison don't crash
+            photo1text.setText("");//after a photo is pick, make "Select Photo" disappear
+            photo2text.setText("");
             //reading photo1 Exif data for photo1Path
             uri1= getImageContentUri(this, new File(photo1Path));
             String dataString1=getDataString(uri1);
@@ -298,6 +300,115 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
         return dataItems;
     }
 
+    /**For TOOLBAR
+     * Do different tasks based on which button is clicked.
+     * @param item buttons in the top toolbar
+     * @return whichever button is clicked
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.download:
+                ImageView image=new ImageView(this);
+                enableZooming1.setVisibility(View.GONE);
+                enableZooming2.setVisibility(View.GONE);
+                viewBitmap=getBitmapOfView(viewGroup);
+                enableZooming1.setVisibility(View.VISIBLE);
+                enableZooming2.setVisibility(View.VISIBLE);
+                image.setImageBitmap(viewBitmap);
+                AlertDialog.Builder collageDialog=new AlertDialog.Builder(this)
+                        .setView(image)
+                        .setTitle("Collage Preview")
+                        .setPositiveButton("save", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                try{
+                                    Calendar calendar=Calendar.getInstance();
+                                    SimpleDateFormat sdformat=new SimpleDateFormat("MM_dd_yyyy_HH:mm:ss");
+                                    String DateString=sdformat.format(calendar.getTime());
+
+                                    file=new File(getPublicDir(),"mySnapshot_"+DateString+".png");
+                                    FileOutputStream fos=new FileOutputStream(file);
+                                    viewBitmap.compress(Bitmap.CompressFormat.JPEG,100,fos);
+                                    fos.close();
+                                    MediaScannerConnection.scanFile(Compare.this,
+                                            new String[]{file.getPath()},
+                                            null,
+                                            null);
+                                    Toast.makeText(Compare.this,"Successfully saved: "+file, Toast.LENGTH_SHORT).show();
+                                }catch(IOException e){
+                                    e.printStackTrace();
+                                }
+                            }//onClick()
+                        })
+                        .setNegativeButton("share", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                Toast.makeText(Compare.this,"Loading....", Toast.LENGTH_SHORT).show();
+                                Calendar calendar=Calendar.getInstance();
+                                SimpleDateFormat sdformat=new SimpleDateFormat("MM_dd_yyyy_HH:mm:ss");
+                                String DateString=sdformat.format(calendar.getTime());
+                                //get Photo uri
+                                ByteArrayOutputStream bytes=new ByteArrayOutputStream();
+                                viewBitmap.compress(Bitmap.CompressFormat.JPEG,100,bytes);
+                                String path=MediaStore.Images.Media.insertImage(Compare.this.getContentResolver(),
+                                        viewBitmap,
+                                        "mySnapshot_"+DateString+".png",
+                                        null);
+                                Uri uri=Uri.parse(path);
+                                //start sharing Intent
+                                Intent intent=new Intent(Intent.ACTION_SEND)
+                                        .setType("image/*")
+                                        .putExtra(Intent.EXTRA_STREAM,uri);
+                                try{
+                                    startActivity(Intent.createChooser(intent, "Share collage..."));
+                                }catch(ActivityNotFoundException e){
+                                    e.printStackTrace();
+                                }
+
+                            }//onClick()
+                        });
+                collageDialog.create().show();
+                return true;
+            case R.id.selectPhoto1:
+                Intent pickPhoto1 = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(pickPhoto1, PICK_PHOTO1);
+                return true;
+            case R.id.selectPhoto2:
+                Intent pickPhoto2 = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(pickPhoto2, PICK_PHOTO2);
+                return true;
+            case R.id.rotatePhoto1:
+                photo1.setRotation(photo1.getRotation() + 90);
+                return true;
+            case R.id.rotatePhoto2:
+                photo2.setRotation(photo2.getRotation() + 90);
+                return true;
+            case R.id.done:
+                if(uri1!=null&&uri2!=null) {
+                    try {
+                        List<CarouselPicker.PickerItem> textItems = new ArrayList<>();
+                        textItems.add(new CarouselPicker.TextItem(getDateDifference(uri1, uri2)+"days", 20));
+                        textItems.add(new CarouselPicker.TextItem(getDifference(0)+"lbs", 20));
+                        textItems.add(new CarouselPicker.TextItem(getDifference(1)+"ins", 20));
+                        textItems.add(new CarouselPicker.TextItem(getDifference(2)+"BMI", 20));
+                        CarouselPicker.CarouselViewAdapter textAdapter = new CarouselPicker.CarouselViewAdapter(this, textItems, 0);
+                        textAdapter.setTextColor(Color.MAGENTA);
+                        carouselPicker.setAdapter(textAdapter);
+                    }catch (NullPointerException e){
+                        e.printStackTrace();
+                    }
+                }else{
+                    Toast.makeText(this,"Make sure you have picked both photos.",Toast.LENGTH_SHORT).show();
+                }
+                return true;
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+
+        }
+    }
     /**ImageView BUTTON Onclick
      * triggered when either imageview is clicked. Differentiated by imageview.ID
      * @param v which imageview is click
@@ -576,117 +687,13 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
 
     }//OnActivityResult() ends
 
-    /**For TOOLBAR
-     * Do different tasks based on which button is clicked.
-     * @param item buttons in the top toolbar
-     * @return whichever button is clicked
-     */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.download:
-                ImageView image=new ImageView(this);
-                viewBitmap=getBitmapOfView(viewGroup);
-                image.setImageBitmap(viewBitmap);
-                AlertDialog.Builder collageDialog=new AlertDialog.Builder(this)
-                        .setView(image)
-                        .setTitle("Collage Preview")
-                        .setPositiveButton("save", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                try{
-                                    Calendar calendar=Calendar.getInstance();
-                                    SimpleDateFormat sdformat=new SimpleDateFormat("MM_dd_yyyy_HH:mm:ss");
-                                    String DateString=sdformat.format(calendar.getTime());
 
-                                    file=new File(getPublicDir(),"mySnapshot_"+DateString+".png");
-                                    FileOutputStream fos=new FileOutputStream(file);
-                                    viewBitmap.compress(Bitmap.CompressFormat.JPEG,100,fos);
-                                    fos.close();
-                                    MediaScannerConnection.scanFile(Compare.this,
-                                            new String[]{file.getPath()},
-                                            null,
-                                            null);
-                                    Toast.makeText(Compare.this,"Successfully saved: "+file, Toast.LENGTH_SHORT).show();
-                                }catch(IOException e){
-                                    e.printStackTrace();
-                                }
-                            }//onClick()
-                        })
-                        .setNegativeButton("share", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                Toast.makeText(Compare.this,"Loading....", Toast.LENGTH_SHORT).show();
-                                Calendar calendar=Calendar.getInstance();
-                                SimpleDateFormat sdformat=new SimpleDateFormat("MM_dd_yyyy_HH:mm:ss");
-                                String DateString=sdformat.format(calendar.getTime());
-                                //get Photo uri
-                                ByteArrayOutputStream bytes=new ByteArrayOutputStream();
-                                viewBitmap.compress(Bitmap.CompressFormat.JPEG,100,bytes);
-                                String path=MediaStore.Images.Media.insertImage(Compare.this.getContentResolver(),
-                                        viewBitmap,
-                                        "mySnapshot_"+DateString+".png",
-                                        null);
-                                Uri uri=Uri.parse(path);
-                                //start sharing Intent
-                                Intent intent=new Intent(Intent.ACTION_SEND)
-                                        .setType("image/*")
-                                        .putExtra(Intent.EXTRA_STREAM,uri);
-                                try{
-                                    startActivity(Intent.createChooser(intent, "Share collage..."));
-                                }catch(ActivityNotFoundException e){
-                                    e.printStackTrace();
-                                }
-
-                            }//onClick()
-                        });
-                collageDialog.create().show();
-                return true;
-            case R.id.selectPhoto1:
-                Intent pickPhoto1 = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(pickPhoto1, PICK_PHOTO1);
-                return true;
-            case R.id.selectPhoto2:
-                Intent pickPhoto2 = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(pickPhoto2, PICK_PHOTO2);
-                return true;
-            case R.id.rotatePhoto1:
-                photo1.setRotation(photo1.getRotation() + 90);
-                return true;
-            case R.id.rotatePhoto2:
-                photo2.setRotation(photo2.getRotation() + 90);
-                return true;
-            case R.id.done:
-                if(uri1!=null&&uri2!=null) {
-                    try {
-                        List<CarouselPicker.PickerItem> textItems = new ArrayList<>();
-                        textItems.add(new CarouselPicker.TextItem(getDateDifference(uri1, uri2)+"days", 20));
-                        textItems.add(new CarouselPicker.TextItem(getDifference(0)+"lbs", 20));
-                        textItems.add(new CarouselPicker.TextItem(getDifference(1)+"ins", 20));
-                        textItems.add(new CarouselPicker.TextItem(getDifference(2)+"BMI", 20));
-                        CarouselPicker.CarouselViewAdapter textAdapter = new CarouselPicker.CarouselViewAdapter(this, textItems, 0);
-                        textAdapter.setTextColor(Color.MAGENTA);
-                        carouselPicker.setAdapter(textAdapter);
-                    }catch (NullPointerException e){
-                        e.printStackTrace();
-                    }
-                }else{
-                    Toast.makeText(this,"Make sure you have picked both photos.",Toast.LENGTH_SHORT).show();
-                }
-                return true;
-            default:
-                // If we got here, the user's action was not recognized.
-                // Invoke the superclass to handle it.
-                return super.onOptionsItemSelected(item);
-
-        }
-    }
 
     /**
      * For getting the date taken of photo with that uri
      * @param photoUri photo uri passed from imageview button handler
      * @return string MM/dd/yyyy
-     */
+    */
     public CharSequence getDate(Uri photoUri){
         Long longDate=null;
         String[] projection=new String[] {MediaStore.Images.Media.DATE_TAKEN};
@@ -699,7 +706,6 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
         java.text.DateFormat formatter=new SimpleDateFormat("MM/dd/yyyy");
         return formatter.format(d);
     }
-
 
     /**
      *

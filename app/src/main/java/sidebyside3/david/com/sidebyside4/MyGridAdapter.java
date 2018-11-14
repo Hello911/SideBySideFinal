@@ -9,8 +9,11 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Process;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -36,6 +40,13 @@ public class MyGridAdapter extends BaseAdapter {
     List<GridViewItem> items;
     Context mContext;
 
+    /**
+     * Sort each GridViewItem in the items List from most recent to least recent
+     */
+    public void sort(){
+        SortTask t=new SortTask();
+        t.execute();
+    }
 
     public MyGridAdapter(Context context, List<GridViewItem> items) {
         mContext=context;
@@ -45,6 +56,7 @@ public class MyGridAdapter extends BaseAdapter {
 
     public void add(GridViewItem i){
         items.add(i);
+        sort();
     }
     @Override
     public int getCount() {
@@ -66,7 +78,7 @@ public class MyGridAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-
+        sort();
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.grid_item, null);
         }
@@ -81,33 +93,59 @@ public class MyGridAdapter extends BaseAdapter {
 
         if (image != null){
             imageView.setImageBitmap(image);
-            if(items.get(position).isSelected())
-            {
-                imageView.setColorFilter(Color.argb(150,200,200,200));
-            }
-            else
-            {
-                imageView.setColorFilter(null);
-            }
         }
 
         return convertView;
     }
 
-    @TargetApi(25)
-    private String getDate(GridViewItem g, Context context) {
-        String dateString="";
+    private Long getMillis(GridViewItem g, Context context) {
+        Long longDate=null;
+        String[] projection=new String[] {MediaStore.Images.Media.DATE_TAKEN};
         Uri uri=getImageContentUri(context,new File(g.getPath()));
-        try{
-            InputStream in=context.getContentResolver().openInputStream(uri);
-            ExifInterface exifInterface=new ExifInterface(in);
-            dateString=exifInterface.getAttribute(ExifInterface.TAG_DATETIME);
-        }catch(IOException e){
-            e.printStackTrace();
+        Cursor cur=context.getContentResolver().query(
+                uri
+                ,projection
+                ,null
+                ,null
+                ,null);
+        if(cur.moveToFirst()){//when cursor is empty
+            int dateColumn=cur.getColumnIndex(MediaStore.Images.Media.DATE_TAKEN);
+            longDate = cur.getLong(dateColumn);
         }
-        return dateString;
+        return longDate;
     }
 
+    /**
+     * For displaying the date of each photo in the Folder
+     * @param g
+     * @param context
+     * @return
+     */
+    private String getDate(GridViewItem g, Context context) {
+        Long longDate=null;
+        String[] projection=new String[] {MediaStore.Images.Media.DATE_TAKEN};
+        Uri uri=getImageContentUri(context,new File(g.getPath()));
+        Cursor cur=context.getContentResolver().query(
+                uri
+                ,projection
+                ,null
+                ,null
+                ,null);
+        if(cur.moveToFirst()){//when cursor is empty
+            int dateColumn=cur.getColumnIndex(MediaStore.Images.Media.DATE_TAKEN);
+            longDate = cur.getLong(dateColumn);
+        }
+        Date d=new Date(longDate);
+        java.text.DateFormat formatter=new SimpleDateFormat("MM/dd/yyyy");
+        return formatter.format(d);
+    }
+
+    /**
+     * This function is needed to get content:// scheme Uri to retrieve exif data
+     * @param context
+     * @param imageFile
+     * @return
+     */
     public static Uri getImageContentUri(Context context, File imageFile) {
         String filePath = imageFile.getAbsolutePath();
         Cursor cursor = context.getContentResolver().query(
@@ -130,5 +168,30 @@ public class MyGridAdapter extends BaseAdapter {
             }
         }
     }
+    public class SortTask extends AsyncTask<Void,Void,Void>{
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
 
+        @Override
+        protected void onPostExecute(Void res) {
+            super.onPostExecute(res);
+        }
+
+        @Override
+        protected Void doInBackground(Void...params) {
+            for(int i=0;i<items.size();i++){
+                for(int j=i+1;j<items.size();j++){
+                    //if element at index j is more recent than element at index i, exchange them
+                    if(getMillis(items.get(j),mContext)>getMillis(items.get(i),mContext)){
+                        GridViewItem temp=items.get(i);
+                        items.set(i,items.get(j));
+                        items.set(j,temp);
+                    }
+                }
+            }
+            return null;
+        }
+    }
 }
