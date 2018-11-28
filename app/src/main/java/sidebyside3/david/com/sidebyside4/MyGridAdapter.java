@@ -40,14 +40,6 @@ public class MyGridAdapter extends BaseAdapter {
     List<GridViewItem> items;
     Context mContext;
 
-    /**
-     * Sort each GridViewItem in the items List from most recent to least recent
-     */
-    public void sort(){
-        SortTask t=new SortTask();
-        t.execute();
-    }
-
     public MyGridAdapter(Context context, List<GridViewItem> items) {
         mContext=context;
         this.items = items;
@@ -56,7 +48,6 @@ public class MyGridAdapter extends BaseAdapter {
 
     public void add(GridViewItem i){
         items.add(i);
-        sort();
     }
     @Override
     public int getCount() {
@@ -78,7 +69,6 @@ public class MyGridAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        sort();
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.grid_item, null);
         }
@@ -96,23 +86,6 @@ public class MyGridAdapter extends BaseAdapter {
         }
 
         return convertView;
-    }
-
-    private Long getMillis(GridViewItem g, Context context) {
-        Long longDate=null;
-        String[] projection=new String[] {MediaStore.Images.Media.DATE_TAKEN};
-        Uri uri=getImageContentUri(context,new File(g.getPath()));
-        Cursor cur=context.getContentResolver().query(
-                uri
-                ,projection
-                ,null
-                ,null
-                ,null);
-        if(cur.moveToFirst()){//when cursor is empty
-            int dateColumn=cur.getColumnIndex(MediaStore.Images.Media.DATE_TAKEN);
-            longDate = cur.getLong(dateColumn);
-        }
-        return longDate;
     }
 
     /**
@@ -166,32 +139,6 @@ public class MyGridAdapter extends BaseAdapter {
             } else {
                 return null;
             }
-        }
-    }
-    public class SortTask extends AsyncTask<Void,Void,Void>{
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected void onPostExecute(Void res) {
-            super.onPostExecute(res);
-        }
-
-        @Override
-        protected Void doInBackground(Void...params) {
-            for(int i=0;i<items.size();i++){
-                for(int j=i+1;j<items.size();j++){
-                    //if element at index j is more recent than element at index i, exchange them
-                    if(getMillis(items.get(j),mContext)>getMillis(items.get(i),mContext)){
-                        GridViewItem temp=items.get(i);
-                        items.set(i,items.get(j));
-                        items.set(j,temp);
-                    }
-                }
-            }
-            return null;
         }
     }
 }

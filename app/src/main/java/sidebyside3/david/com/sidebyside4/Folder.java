@@ -10,6 +10,7 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -63,18 +64,22 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
         ,View.OnClickListener{
     List<GridViewItem> gridItems;
     List<String> toCompare;
-    MyGridAdapter adp;
-    GridView gridView;
+    public static MyGridAdapter adp;
+    public static GridView gridView;
     FloatingActionButton but;
+    String folderPath=Environment.getExternalStorageDirectory()+"/DCIM/raspberry";
+    SharedPreferences pref;
+    SharedPreferences.Editor editor;
+    MyAsyncTask createItems;
 
     //Import
     int PICK_IMAGE_MULTIPLE = 1;
-    String imageEncoded;
-    List<String> imagesEncodedList;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.folder);
+        gridView = (GridView) findViewById(R.id.gridView);
+        gridItems=new ArrayList<>();
         but = (FloatingActionButton)findViewById(R.id.button);
         but.setOnClickListener(this);
         toCompare = new ArrayList<>();
@@ -85,10 +90,10 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
             Toast.makeText(this,"Enable permission in Setting->App",Toast.LENGTH_SHORT).show();
 
         }else{
-            setGridAdapter(Environment.getExternalStorageDirectory()+"/DCIM/raspberry");
+            setGridAdapter(folderPath);
         }
-        adp.sort();
-
+        pref=getApplicationContext().getSharedPreferences("photoNum",MODE_PRIVATE);
+        editor=pref.edit();
     }
 
     @Override
@@ -158,6 +163,20 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
                         Date d=new Date(originalFile.lastModified());
                         long millis=d.getTime();
 
+                        //increment count of photo taken on a day
+                        int num=pref.getInt("photos",0);
+                        Calendar cal=Calendar.getInstance();
+                        int today=cal.get(Calendar.DAY_OF_MONTH);
+                        cal.setTime(d);
+                        int dateTaken=cal.get(Calendar.DAY_OF_MONTH);
+                        if(dateTaken==today){
+                            num++;
+                            editor.putInt("photos",num);
+                            editor.putInt("day",today);
+                            editor.apply();
+                        }
+
+
                         Bitmap bmp1 = BitmapFactory.decodeFile(filePath);
                         Bitmap bmp2 = bmp1.copy(bmp1.getConfig(), true);
                         //store the newly made copy in another folder
@@ -226,6 +245,19 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
                         File originalFile=new File(filePath);
                         Date d=new Date(originalFile.lastModified());
                         Long millis=d.getTime();
+
+                        //increment count of photo taken on a day
+                        int num=pref.getInt("photos",0);
+                        Calendar cal=Calendar.getInstance();
+                        int today=cal.get(Calendar.DAY_OF_MONTH);
+                        cal.setTime(d);
+                        int dateTaken=cal.get(Calendar.DAY_OF_MONTH);
+                        if(dateTaken==today){
+                            num++;
+                            editor.putInt("photos",num);
+                            editor.putInt("day",today);
+                            editor.apply();
+                        }
 
                         Bitmap bmp1=BitmapFactory.decodeFile(filePath);
                         Bitmap bmp2=bmp1.copy(bmp1.getConfig(),true);
@@ -320,40 +352,38 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
      */
     private void setGridAdapter(String path) {
         // Create a new grid adapter
-        gridItems = createGridItems(path);
-        adp = new MyGridAdapter(this, gridItems);
-        // Set the grid adapter
-        gridView = (GridView) findViewById(R.id.gridView);
-        gridView.setAdapter(adp);
-
-        // Set the onClickListener
-        gridView.setOnItemClickListener(this);
+        createGridItems(path);
     }
 
-    
+
 
     /**
      * Go through the specified directory, and create items to display in our
      * GridView
      */
-    private List<GridViewItem> createGridItems(String directoryPath) {
-        CreateItem task=new CreateItem(directoryPath);
-        task.execute();
-        return task.myMethod();
+    private void createGridItems(String directoryPath) {
+
+        MyAsyncTask createItems = new MyAsyncTask(this,new MyAsyncTask.AsyncResponse() {
+            @Override
+            public void processFinish(List<GridViewItem> list) {
+                gridItems=list;
+                adp = new MyGridAdapter(Folder.this, gridItems);
+                // Set the grid adapter
+
+                //gridView.setAdapter(adp);
+
+                // Set the onClickListener
+                gridView.setOnItemClickListener(Folder.this);
+            }
+        });
+        //createItems.execute(folderPath);
+        createItems.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,folderPath);
+        //sometimes, the thread executed last time Folder was opened isn't done.
+        //THREAD_POOL_EXECUTE make this thread run in parallel with the previous unfinished ones
+
     }
 
 
-    /**
-     * Checks the file to see if it has a compatible extension.
-     */
-    private boolean isImageFile(String filePath) {
-        if (filePath.endsWith(".jpg") || filePath.endsWith(".png"))
-        // Add other formats as desired
-        {
-            return true;
-        }
-        return false;
-    }
 
     /**
      * Chnage FAB to compare icon
@@ -402,22 +432,7 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
 
     }
 
-    /**
-     * This can be used to filter files.
-     */
-    private class ImageFileFilter implements FileFilter {
 
-        @Override
-        public boolean accept(File file) {
-            if (file.isDirectory()) {
-                return true;
-            }
-            else if (isImageFile(file.getAbsolutePath())) {
-                return true;
-            }
-            return false;
-        }
-    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults){
@@ -431,4 +446,5 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
             }
         }
     }
+
 }

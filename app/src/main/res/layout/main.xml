@@ -10,20 +10,13 @@
     <TextView
         android:id="@+id/dailyPhotos"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:text="No photo  taken today"
         android:textColor="@color/magenta"
-        android:textSize="30sp" />
+        android:textSize="35sp"
+        android:layout_marginTop="0dp"/>
 
-    <TextView
-        android:id="@+id/folder"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:gravity="center_horizontal"
-        android:text="50 photos in Folder"
-        android:textColor="@color/blue"
-        android:textSize="20sp" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -35,7 +28,17 @@
             android:layout_width="30dp"
             android:layout_height="match_parent"
             android:layout_centerHorizontal="true" />
-
+        <Button
+            android:id="@+id/folder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_centerHorizontal="true"
+            android:layout_above="@id/setting"
+            android:text="50 photos in Folder"
+            android:backgroundTint="@color/blue"
+            android:textColor="@color/white"
+            android:textSize="20sp"/>
         <ImageView
             android:id="@+id/setting"
             android:layout_width="wrap_content"

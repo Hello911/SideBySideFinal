@@ -17,6 +17,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,7 +35,8 @@ import java.util.Date;
 public class Main extends AppCompatActivity implements View.OnClickListener{
     static final int  CAMERA=1;
     ImageView camera,edit,setting,compare;
-    TextView folder,dailyPhotos;
+    TextView dailyPhotos;
+    Button folder;
     File mCurrentPhotoFile;
     Uri imageUri;
     SharedPreferences pref;
@@ -56,7 +58,7 @@ public class Main extends AppCompatActivity implements View.OnClickListener{
         edit=(ImageView)findViewById(R.id.edit);
         edit.setOnClickListener(this);
 
-        folder=(TextView)findViewById(R.id.folder);
+        folder=(Button)findViewById(R.id.folder);
         folder.setOnClickListener(this);
 
         dailyPhotos=(TextView)findViewById(R.id.dailyPhotos);
@@ -197,13 +199,9 @@ public class Main extends AppCompatActivity implements View.OnClickListener{
             int dayLastSaved=pref.getInt("day",0);
             //every time a photo is saved, increment num to keep track daily photo number
             int num=pref.getInt("photos",0);
-            if(dayLastSaved==today){
-                num++;
-            }else{
-                num=1;
-            }
+            num++;
             editor.putInt("photos", num);
-            //every time a photo was saved, put today's date into "day"
+            //every time a photo was saved, put today's date into "day" for dayLastSaved
             editor.putInt("day",today);//
             editor.apply();
 
