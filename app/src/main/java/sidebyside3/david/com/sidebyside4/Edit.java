@@ -161,85 +161,12 @@ public class Edit extends AppCompatActivity implements View.OnTouchListener, Vie
                 if (uri != null) {
                     LayoutInflater factory = LayoutInflater.from(this);
                     final View view = factory.inflate(R.layout.editdata, null);
-                    final EditText strength= (EditText) view.findViewById(R.id.strength);
                     final EditText weight = (EditText) view.findViewById(R.id.weight);
                     final EditText height = (EditText) view.findViewById(R.id.height);
                     final EditText BMI = (EditText) view.findViewById(R.id.BMI);
                     final EditText note = (EditText) view.findViewById(R.id.note);
-                    final Button bt = (Button) view.findViewById(R.id.bt);
-                    final GraphView graph=(GraphView)view.findViewById(R.id.graph);
-
-                    //generate graph
-                    mSeries1 = new LineGraphSeries<>();
-                    graph.addSeries(mSeries1);
-                    graph.getViewport().setXAxisBoundsManual(true);
-                    graph.getViewport().setMinX(0);
-                    graph.getViewport().setMaxX(40);
 
 
-                    //finish generating graph
-
-                    //set up Bluetooth
-                    spp=new BluetoothSPP(this);
-                    //Toast user when BT is not available. And exit device selection window.
-                    if(!spp.isBluetoothAvailable()){
-                        Toast.makeText(this, "Bluetooth is NOT available.",Toast.LENGTH_SHORT).show();
-                        finish();
-                    }
-                    //when status is changed
-                    spp.setBluetoothConnectionListener(new BluetoothSPP.BluetoothConnectionListener() {
-                        @Override
-                        public void onDeviceConnected(String name, String address) {
-                            strength.setText("Connected to "+name);
-                        }
-                        @Override
-                        public void onDeviceDisconnected() {
-                            strength.setText("Disconnected");
-                            futureThread.cancel(true);
-                        }
-
-                        @Override
-                        public void onDeviceConnectionFailed() {
-                            strength.setText("Connection failed");
-                        }
-                    });
-                    //listen to the Bluetooth button in dialog
-                    bt.setOnClickListener(new View.OnClickListener(){
-                        @Override
-                        public void onClick (View v){
-                            if(spp.getServiceState()== BluetoothState.STATE_CONNECTED){
-                                spp.disconnect();
-                            }
-                            else{
-                                Intent intent=new Intent(Edit.this,DeviceList.class);
-                                startActivityForResult(intent, BluetoothState.REQUEST_CONNECT_DEVICE);
-                            }
-                        }
-                    });
-                    //To receive data
-                    spp.setOnDataReceivedListener(new BluetoothSPP.OnDataReceivedListener() {
-                        public void onDataReceived(byte[] data, final String message) {
-                            strength.setText(message);
-                        }
-                    });
-                    if (!spp.isBluetoothEnabled()) {//if Bluetooth is NOT enabled
-                        //Enable Bluetooth
-                        Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                        startActivityForResult(enableBtIntent, 1);
-                        //Now check if Bluetooth is enabled
-                        if (spp.isBluetoothEnabled()==true) {//if Bluetooth is now enabled
-                            Toast.makeText(getApplicationContext(), "Bluetooth is ON", Toast.LENGTH_SHORT).show();
-                        }
-                        else {//if Bluetooth is still NOT enabled
-                            Toast.makeText(getApplicationContext(), "Bluetooth OFF", Toast.LENGTH_SHORT).show();
-                        }
-                    } else {//if Bluetooth is already enabled
-                        if (!spp.isServiceAvailable()) {//if spp service is NOT available
-                            spp.setupService();
-                            spp.startService(BluetoothState.DEVICE_OTHER);
-                        }
-                    }
-                    //Bluetooth set up ENDS
                     AlertDialog.Builder exifDialog = new AlertDialog.Builder(this)
                             .setTitle("Edit Health Data")
                             .setView(view)

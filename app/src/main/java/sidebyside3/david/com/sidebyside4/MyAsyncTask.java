@@ -56,7 +56,7 @@ public class MyAsyncTask extends AsyncTask<String,Void,List<GridViewItem>> imple
             items.add(i, new GridViewItem(file.getAbsolutePath(), false, image, false, i));
 
                 activity.runOnUiThread(this);//this means the method implementing Runnable interface will be executed
-            
+
         }
         return items;
     }
