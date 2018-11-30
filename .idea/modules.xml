@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/SideBySideFinal.iml" filepath="$PROJECT_DIR$/.idea/SideBySideFinal.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/sidebyside4.iml" filepath="$PROJECT_DIR$/sidebyside4.iml" />
     </modules>
   </component>
 </project>
