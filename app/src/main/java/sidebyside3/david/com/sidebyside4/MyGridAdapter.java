@@ -36,9 +36,9 @@ import java.util.List;
 
 public class MyGridAdapter extends BaseAdapter {
 
-    LayoutInflater inflater;
-    List<GridViewItem> items;
-    Context mContext;
+    private LayoutInflater inflater;
+    private List<GridViewItem> items;
+    private Context mContext;
 
     public MyGridAdapter(Context context, List<GridViewItem> items) {
         mContext=context;

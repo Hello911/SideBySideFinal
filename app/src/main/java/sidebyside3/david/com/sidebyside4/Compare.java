@@ -13,7 +13,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.PointF;
-import android.media.ExifInterface;
+import android.support.media.ExifInterface;
 import android.media.Image;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
