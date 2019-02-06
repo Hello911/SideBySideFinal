@@ -25,6 +25,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -152,7 +153,7 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
 
         //for COMPARISON portrait mode
         carouselPicker=(CarouselPicker)findViewById(R.id.carousel);
-        CarouselPicker.CarouselViewAdapter textAdapter = new CarouselPicker.CarouselViewAdapter(this, getList(20), 0);
+        CarouselPicker.CarouselViewAdapter textAdapter = new CarouselPicker.CarouselViewAdapter(this, getList(spToDp(17)), 0);
         textAdapter.setTextColor(Color.MAGENTA);
         carouselPicker.setAdapter(textAdapter);
 
@@ -899,6 +900,12 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
             Log.e("PUBLIC DIRECTORY", "Directory not created");
         }
         return file;
+    }
+    public int spToDp(float sp)
+    {
+        float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, getResources().getDisplayMetrics());
+        float dp = px / getResources().getDisplayMetrics().density;
+        return (int) dp;
     }
 }
 
