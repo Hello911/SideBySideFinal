@@ -153,7 +153,7 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
 
         //for COMPARISON portrait mode
         carouselPicker=(CarouselPicker)findViewById(R.id.carousel);
-        CarouselPicker.CarouselViewAdapter textAdapter = new CarouselPicker.CarouselViewAdapter(this, getList(spToDp(17)), 0);
+        CarouselPicker.CarouselViewAdapter textAdapter = new CarouselPicker.CarouselViewAdapter(this, getList(20), 0);
         textAdapter.setTextColor(Color.MAGENTA);
         carouselPicker.setAdapter(textAdapter);
 
@@ -901,11 +901,6 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
         }
         return file;
     }
-    public int spToDp(float sp)
-    {
-        float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, getResources().getDisplayMetrics());
-        float dp = px / getResources().getDisplayMetrics().density;
-        return (int) dp;
-    }
+
 }
 

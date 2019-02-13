@@ -125,6 +125,11 @@ public class Main extends AppCompatActivity implements View.OnClickListener{
 
                 }
             }
+            case 2:
+                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                {
+
+                }
         }
     }
 
@@ -136,7 +141,12 @@ public class Main extends AppCompatActivity implements View.OnClickListener{
                         , Manifest.permission.CAMERA)!= PackageManager.PERMISSION_GRANTED){
                     ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CAMERA},1);
                     Toast.makeText(this,"Enable permission in Setting->App",Toast.LENGTH_SHORT).show();
-                }else{
+                }
+                else if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+                {
+                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 2);
+                }
+                else {
                     try {
                         dispatchTakePictureIntent();
                     } catch (IOException e){
