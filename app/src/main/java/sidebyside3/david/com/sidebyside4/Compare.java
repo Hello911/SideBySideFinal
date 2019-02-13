@@ -639,6 +639,7 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
         //display the 1st select photo, and its data
         if (requestCode == PICK_PHOTO1 && resultCode == RESULT_OK && data != null && data.getData() != null) {
             photo1text.setText("");//after a photo is pick, make "Select Photo" disappear
+            photo2text.setText("");
             uri1 = data.getData();
             //reading photo1 Exif data
             String dataString1=getDataString(uri1);
@@ -952,10 +953,5 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
         return file;
     }
 
-    public int spToDp(float sp){
-        float px= TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, getResources().getDisplayMetrics());
-        float dp=px/getResources().getDisplayMetrics().density;
-        return (int) dp;
-    }
 }
 
