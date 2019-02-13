@@ -12,6 +12,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 import static android.content.Context.MODE_PRIVATE;
 import static android.content.Intent.ACTION_BOOT_COMPLETED;
@@ -32,9 +33,11 @@ public class AlarmReceiver extends BroadcastReceiver {
         int minute = pref.getInt("Minute", 0);
         boolean switchState=pref.getBoolean("switchState",true);
 
-        if(Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction()))
+        if("android.intent.action.LOCKED_BOOT_COMPLETED".equals(intent.getAction()))
         {
-                Log.d("START_UP","Boot intent received!"+intent.getAction());
+            Setting setting=new Setting();
+            setting.scheduleNotification(hour,minute);
+            Toast.makeText(context, "hello", Toast.LENGTH_SHORT).show();
         }
 
         if("SCHEDULE_IT".equals(intent.getAction())) {
