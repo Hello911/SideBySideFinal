@@ -51,7 +51,7 @@ public class Setting extends AppCompatActivity implements View.OnClickListener, 
     }
 
     /**
-     * Show alertDialog to pick time
+     * When 'Set time' is pressed, launch time picker
      * @param v
      */
     @Override
@@ -83,6 +83,7 @@ public class Setting extends AppCompatActivity implements View.OnClickListener, 
      */
     public void scheduleNotification(int hour, int minute){
         Intent intent1=new Intent(this,AlarmReceiver.class);
+        intent1.setAction("SCHEDULE_IT");
         //FLAG_UPDATE_CURRENT: if the described PendingIntent already exists,
         //keep it but replace its extra data with what is in this new Intent.
         PendingIntent pendingIntent=PendingIntent.getBroadcast(this
@@ -93,7 +94,7 @@ public class Setting extends AppCompatActivity implements View.OnClickListener, 
 
         Calendar calendar=Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY,hour);
+        calendar.set(Calendar.HOUR_OF_DAY,hour);//this 'hour' and minute' is picked by user
         calendar.set(Calendar.MINUTE,minute);
 
         long _alarm=0;

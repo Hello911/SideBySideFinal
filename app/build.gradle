@@ -6,8 +6,8 @@ android {
         applicationId "sidebyside3.david.com.sidebyside4"
         minSdkVersion 15
         targetSdkVersion 26
-        versionCode 1
-        versionName "1.0"
+        versionCode 3
+        versionName "3.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -37,6 +37,17 @@ dependencies {
     //FAB
     implementation 'com.android.support:design:26.1.0'
     implementation "com.android.support:exifinterface:26.1.0"
+    //Tour Guide user's guide
+    compile('com.github.worker8:tourguide:2.0.0-SNAPSHOT@aar') {
+        transitive = true
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven() {
+        url "https://oss.sonatype.org/content/repositories/snapshots"
+    }
 }
 
 configurations.all {

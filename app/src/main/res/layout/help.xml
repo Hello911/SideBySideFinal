@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#aa000000">
+    <!--to explain what daily photo count is-->
+    <ImageView
+        android:visibility="visible"
+        android:id="@+id/photoCountArrow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/up_arrow"
+        android:layout_marginTop="50dp"
+        android:layout_marginLeft="170dp"/>
+    <TextView
+        android:visibility="visible"
+        android:id="@+id/photoCountNote"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:text="@string/photoCountNote"
+        android:layout_below="@+id/photoCountArrow"/>
+    <!--to explain what folder button is-->
+    <ImageView
+        android:visibility="invisible"
+        android:id="@+id/folderArrow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/down_arrow"
+        android:layout_marginTop="130dp"
+        android:layout_marginLeft="170dp"/>
+    <TextView
+        android:visibility="invisible"
+        android:id="@+id/folderNote"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:text="@string/folderNote"
+        android:layout_below="@+id/folderArrow"
+        android:layout_marginTop="80dp"/>
+    <!--to explain what Setting button is-->
+    <ImageView
+        android:visibility="invisible"
+        android:id="@+id/settingArrow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/right_arrow"
+        android:layout_marginTop="230dp"
+        android:layout_marginLeft="60dp"/>
+    <TextView
+        android:visibility="invisible"
+        android:id="@+id/settingNote"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/skip"
+        android:text="@string/settingNote"/>
+    <!--to explain what Camera button is-->
+    <ImageView
+        android:visibility="invisible"
+        android:id="@+id/cameraArrow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/left_arrow"
+        android:layout_marginTop="230dp"
+        android:layout_marginLeft="300dp"/>
+    <TextView
+        android:visibility="invisible"
+        android:id="@+id/cameraNote"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/skip"
+        android:text="@string/cameraNote"/>
+
+    <!--to explain what Edit button is-->
+    <ImageView
+        android:visibility="invisible"
+        android:id="@+id/editArrow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/right_arrow"
+        android:layout_marginTop="340dp"
+        android:layout_marginLeft="60dp"/>
+    <TextView
+        android:visibility="invisible"
+        android:id="@+id/editNote"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:text="@string/editNote"/>
+
+    <!--to explain what Compare button is-->
+    <ImageView
+        android:visibility="invisible"
+        android:id="@+id/compareArrow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/left_arrow"
+        android:layout_marginTop="340dp"
+        android:layout_marginLeft="300dp"/>
+    <TextView
+        android:visibility="invisible"
+        android:id="@+id/compareNote"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:text="@string/compareNote"/>
+
+
+    <TextView
+        android:id="@+id/skip"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="Skip"
+        android:textSize="30sp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"/>
+    <TextView
+        android:id="@+id/next"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="Next"
+        android:textSize="30sp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"/>
+</RelativeLayout>

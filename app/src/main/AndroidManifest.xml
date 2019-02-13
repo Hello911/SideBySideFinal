@@ -2,9 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="sidebyside3.david.com.sidebyside4">
 
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-feature android:name="android.hardware.camera" android:required="false"/>
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
 
     <application
         android:allowBackup="true"
@@ -13,11 +17,9 @@
         android:roundIcon="@mipmap/icon"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <receiver android:name=".AlarmReceiver"/>
-        <receiver android:name=".BootReceiver">
+        <receiver android:name=".AlarmReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <category android:name="android.intent.category.HOME" />
             </intent-filter>
         </receiver>
 
@@ -28,8 +30,9 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_paths"/>
+                android:resource="@xml/provider_paths" />
         </provider>
+
         <activity android:name=".Main">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -42,7 +45,10 @@
             android:name=".Edit"
             android:label="Edit" />
         <activity android:name=".Setting" />
-        <activity android:name=".Compare" android:label="Compare"></activity>
+        <activity
+            android:name=".Compare"
+            android:label="Compare" />
+        <activity android:name=".Help" android:theme="@style/Theme.Transparent"></activity>
     </application>
 
 </manifest>

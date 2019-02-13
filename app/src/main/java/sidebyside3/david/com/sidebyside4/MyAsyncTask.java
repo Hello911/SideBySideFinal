@@ -47,16 +47,17 @@ public class MyAsyncTask extends AsyncTask<String,Void,List<GridViewItem>> imple
 
         // List all the items within the folder.
         File[] files = new File(path[0]).listFiles();
-
-        for (int i = 0; i < files.length; i++) {
-            final File file = files[i];
-            Bitmap image = BitmapHelper.decodeBitmapFromFile(file.getAbsolutePath(),
-                    50,
-                    50);
-            items.add(i, new GridViewItem(file.getAbsolutePath(), false, image, false, i));
+        if(files != null) {
+            for (int i = 0; i < files.length; i++) {
+                final File file = files[i];
+                Bitmap image = BitmapHelper.decodeBitmapFromFile(file.getAbsolutePath(),
+                        50,
+                        50);
+                items.add(i, new GridViewItem(file.getAbsolutePath(), false, image, false, i));
 
                 activity.runOnUiThread(this);//this means the method implementing Runnable interface will be executed
 
+            }
         }
         return items;
     }

@@ -25,6 +25,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -232,7 +233,22 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
             }catch(NullPointerException e) {
                 e.printStackTrace();
             }
-
+            if(uri1!=null&&uri2!=null) {
+                try {
+                    List<CarouselPicker.PickerItem> textItems = new ArrayList<>();
+                    textItems.add(new CarouselPicker.TextItem(getDateDifference(uri1, uri2)+"days", 20));
+                    textItems.add(new CarouselPicker.TextItem(getDifference(0)+"lbs", 20));
+                    textItems.add(new CarouselPicker.TextItem(getDifference(2)+"BMI", 20));
+                    textItems.add(new CarouselPicker.TextItem(getDifference(1)+"ins", 20));
+                    CarouselPicker.CarouselViewAdapter textAdapterZ = new CarouselPicker.CarouselViewAdapter(this, textItems, 0);
+                    textAdapterZ.setTextColor(Color.MAGENTA);
+                    carouselPicker.setAdapter(textAdapterZ);
+                }catch (NullPointerException e){
+                    e.printStackTrace();
+                }
+            }else{
+                //wait for the other photo to be picked
+            }
         }
 
         enableZooming1=(Button)findViewById(R.id.enableZooming1);
@@ -623,7 +639,6 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
         //display the 1st select photo, and its data
         if (requestCode == PICK_PHOTO1 && resultCode == RESULT_OK && data != null && data.getData() != null) {
             photo1text.setText("");//after a photo is pick, make "Select Photo" disappear
-            photo2text.setText("");
             uri1 = data.getData();
             //reading photo1 Exif data
             String dataString1=getDataString(uri1);
@@ -645,6 +660,7 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
             }catch(NullPointerException e) {
                 e.printStackTrace();
             }
+
             try {
                 Bitmap bitmap1= MediaStore.Images.Media.getBitmap(getContentResolver(), uri1);
                 photo1.setImageBitmap(bitmap1);
@@ -652,12 +668,29 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            //if uri2 is already picked, calculate difference
+            if(uri1!=null&&uri2!=null) {
+                try {
+                    List<CarouselPicker.PickerItem> textItems = new ArrayList<>();
+                    textItems.add(new CarouselPicker.TextItem(getDateDifference(uri1, uri2)+"days", 20));
+                    textItems.add(new CarouselPicker.TextItem(getDifference(0)+"lbs", 20));
+                    textItems.add(new CarouselPicker.TextItem(getDifference(2)+"BMI", 20));
+                    textItems.add(new CarouselPicker.TextItem(getDifference(1)+"ins", 20));
+                    CarouselPicker.CarouselViewAdapter textAdapter = new CarouselPicker.CarouselViewAdapter(this, textItems, 0);
+                    textAdapter.setTextColor(Color.MAGENTA);
+                    carouselPicker.setAdapter(textAdapter);
+                }catch (NullPointerException e){
+                    e.printStackTrace();
+                }
+            }else{
+                //wait for the other photo to be picked
+            }
         }
         //display the 2nd select photo, and its data
         if (requestCode == PICK_PHOTO2 && resultCode == RESULT_OK && data != null && data.getData() != null) {
-
+            photo2text.setText("");
             uri2 = data.getData();
-            String dataString2=getDataString(uri1);
+            String dataString2=getDataString(uri2);
             if(dataString2!=null) {//this if else structure is to prevent empty String[] for photos w/o data
                 dataArray2 = dataString2.split("\\s+");
             }else{
@@ -683,6 +716,24 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
+            if(uri1!=null&&uri2!=null) {
+                try {
+                    List<CarouselPicker.PickerItem> textItems = new ArrayList<>();
+                    textItems.add(new CarouselPicker.TextItem(getDateDifference(uri1, uri2)+"days", 20));
+                    textItems.add(new CarouselPicker.TextItem(getDifference(0)+"lbs", 20));
+                    textItems.add(new CarouselPicker.TextItem(getDifference(2)+"BMI", 20));
+                    textItems.add(new CarouselPicker.TextItem(getDifference(1)+"ins", 20));
+                    CarouselPicker.CarouselViewAdapter textAdapter = new CarouselPicker.CarouselViewAdapter(this, textItems, 0);
+                    textAdapter.setTextColor(Color.MAGENTA);
+                    carouselPicker.setAdapter(textAdapter);
+                }catch (NullPointerException e){
+                    e.printStackTrace();
+                }
+            }else{
+                //wait for the other photo to be picked
+            }
+
         }
 
     }//OnActivityResult() ends
@@ -750,7 +801,7 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
     public String getDifference(int index){
         int[] intDifference={1,2,3};
         String[] stringDifference={"1","2","3"};
-        for (int j=0; j<dataArray1.length; j++){
+        for (int j=0; j<3; j++){//4 because there are only 3 convertible string, the rest is words
             intDifference[j]=Integer.parseInt(dataArray2[j])-Integer.parseInt(dataArray1[j]);
         }
         for(int j=0;j<intDifference.length;j++){
@@ -899,6 +950,12 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
             Log.e("PUBLIC DIRECTORY", "Directory not created");
         }
         return file;
+    }
+
+    public int spToDp(float sp){
+        float px= TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, getResources().getDisplayMetrics());
+        float dp=px/getResources().getDisplayMetrics().density;
+        return (int) dp;
     }
 }
 

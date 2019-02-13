@@ -11,8 +11,10 @@ import android.graphics.BitmapFactory;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 import static android.content.Context.MODE_PRIVATE;
+import static android.content.Intent.ACTION_BOOT_COMPLETED;
 import static android.content.Intent.ACTION_LOCKED_BOOT_COMPLETED;
 
 /**
@@ -25,16 +27,17 @@ public class AlarmReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent){
+        SharedPreferences pref = context.getSharedPreferences("MyPref",MODE_PRIVATE);
+        int hour = pref.getInt("Hour", 0);
+        int minute = pref.getInt("Minute", 0);
+        boolean switchState=pref.getBoolean("switchState",true);
 
-        if(intent.getAction() != null && intent.getAction().equals(ACTION_LOCKED_BOOT_COMPLETED))
+        if(Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction()))
         {
-            Setting s = new Setting();
-            SharedPreferences pref = context.getSharedPreferences("MyPref",MODE_PRIVATE);
-            int h = pref.getInt("Hour", 0);
-            int m = pref.getInt("Minute", 0);
-            s.scheduleNotification(h, m);
+                Log.d("START_UP","Boot intent received!"+intent.getAction());
         }
-        else {
+
+        if("SCHEDULE_IT".equals(intent.getAction())) {
             Bitmap largeIcon = BitmapFactory.decodeResource(context.getResources(), R.drawable.camera);
 
             NotificationManager notificationManager = (NotificationManager) context
