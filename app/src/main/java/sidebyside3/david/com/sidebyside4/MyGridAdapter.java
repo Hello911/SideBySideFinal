@@ -134,8 +134,8 @@ public class MyGridAdapter extends BaseAdapter {
             if (imageFile.exists()) {
                 ContentValues values = new ContentValues();
                 values.put(MediaStore.Images.Media.DATA, filePath);
-                return context.getContentResolver().insert(
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+                Uri ret = context.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+                return ret;
             } else {
                 return null;
             }

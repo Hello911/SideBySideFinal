@@ -28,9 +28,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -83,7 +85,7 @@ public class Main extends AppCompatActivity implements View.OnClickListener{
     public void onResume(){
         super.onResume();
         //refresh total photo count after returning from camera Intent
-        File dir=new File("/sdcard/DCIM/raspberry");
+        File dir=new File(Environment.getExternalStorageDirectory()+ getString(R.string.file));
         File[] files=dir.listFiles();
         int numOfFiles;
         if(files!=null){
@@ -117,6 +119,7 @@ public class Main extends AppCompatActivity implements View.OnClickListener{
             default:
                 dailyPhotos.setText(num+" photos taken today");
         }
+
     }
 
     @Override
