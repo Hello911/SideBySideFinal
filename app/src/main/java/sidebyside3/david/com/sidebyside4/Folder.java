@@ -67,7 +67,7 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
     public static MyGridAdapter adp;
     public static GridView gridView;
     FloatingActionButton but;
-    String folderPath=Environment.getExternalStorageDirectory()+"/DCIM/raspberry";
+    String folderPath;
     SharedPreferences pref;
     SharedPreferences.Editor editor;
     MyAsyncTask createItems;
@@ -83,7 +83,7 @@ public class Folder extends Activity implements AdapterView.OnItemClickListener
         but = (FloatingActionButton)findViewById(R.id.button);
         but.setOnClickListener(this);
         toCompare = new ArrayList<>();
-
+        folderPath=Environment.getExternalStorageDirectory()+ getResources().getString(R.string.file);
         if(ContextCompat.checkSelfPermission(this
                 , Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},1);

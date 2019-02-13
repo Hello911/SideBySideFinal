@@ -14,6 +14,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -50,6 +51,7 @@ public class MyAsyncTask extends AsyncTask<String,Void,List<GridViewItem>> imple
         if(files != null) {
             for (int i = 0; i < files.length; i++) {
                 final File file = files[i];
+
                 Bitmap image = BitmapHelper.decodeBitmapFromFile(file.getAbsolutePath(),
                         50,
                         50);
@@ -59,6 +61,7 @@ public class MyAsyncTask extends AsyncTask<String,Void,List<GridViewItem>> imple
 
             }
         }
+
         return items;
     }
 
