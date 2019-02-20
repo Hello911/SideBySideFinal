@@ -701,7 +701,7 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
                 try {
                     List<CarouselPicker.PickerItem> textItems = new ArrayList<>();
                     textItems.add(new CarouselPicker.TextItem(getDateDifference(uri1, uri2)+"days", 20));
-                    textItems.add(new CarouselPicker.TextItem(getDifference(0)+"lbs", 20));
+                    textItems.add(new CarouselPicker.TextItem((getDifference(0)) +"lbs", 20));
                     textItems.add(new CarouselPicker.TextItem(getDifference(2)+"BMI", 20));
                     textItems.add(new CarouselPicker.TextItem(getDifference(1)+"ins", 20));
                     CarouselPicker.CarouselViewAdapter textAdapter = new CarouselPicker.CarouselViewAdapter(this, textItems, 0);
@@ -779,14 +779,15 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
      * @return
      */
     public String getDifference(int index){
-        int[] intDifference={1,2,3};
+        double[] intDifference={1,2,3};
         String[] stringDifference={"1","2","3"};
         for (int j=0; j<3; j++){//4 because there are only 3 convertible string, the rest is words
-            intDifference[j]=Integer.parseInt(dataArray2[j])-Integer.parseInt(dataArray1[j]);
+            intDifference[j]=Double.parseDouble(dataArray2[j])-Double.parseDouble(dataArray1[j]);
         }
-        for(int j=0;j<intDifference.length;j++){
-            stringDifference[j]=Integer.toString(intDifference[j]);
-        }
+        stringDifference[0] = Integer.toString((int)intDifference[0]);
+        stringDifference[2]=String.format("%.1f", intDifference[2]);
+        stringDifference[1] = Integer.toString((int)intDifference[1]);
+
         return stringDifference[index];
     }
 

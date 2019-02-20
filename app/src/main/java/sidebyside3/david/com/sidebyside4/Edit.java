@@ -44,6 +44,7 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -163,7 +164,6 @@ public class Edit extends AppCompatActivity implements View.OnTouchListener, Vie
                     final View view = factory.inflate(R.layout.editdata, null);
                     final EditText weight = (EditText) view.findViewById(R.id.weight);
                     final EditText height = (EditText) view.findViewById(R.id.height);
-                    final EditText BMI = (EditText) view.findViewById(R.id.BMI);
                     final EditText note = (EditText) view.findViewById(R.id.note);
 
 
@@ -179,15 +179,14 @@ public class Edit extends AppCompatActivity implements View.OnTouchListener, Vie
                                     if(height.getText().toString().equals("")){
                                         height.setText("0");
                                     }
-                                    if(BMI.getText().toString().equals("")){
-                                        BMI.setText("0");
-                                    }
+                                    double BMI = Double.parseDouble(weight.getText().toString()) / Double.parseDouble(height.getText().toString()) / Double.parseDouble(height.getText().toString()) * 703;
+                                    String bmi = String.format("%.1f", BMI);
                                     if("".equals(note.getText().toString())){
                                         note.setText("nothing written");
                                     }
                                     String description = weight.getText() + " "
                                             + height.getText() + " "
-                                            + BMI.getText() + " "
+                                            + bmi + " "
                                             + note.getText();
                                     try {
                                         File file = new File(getUriRealPath(Edit.this, uri));
