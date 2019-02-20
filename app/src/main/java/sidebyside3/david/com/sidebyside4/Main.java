@@ -36,7 +36,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
-import tourguide.tourguide.TourGuide;
+
 
 public class Main extends AppCompatActivity implements View.OnClickListener{
     static final int  CAMERA=1;
