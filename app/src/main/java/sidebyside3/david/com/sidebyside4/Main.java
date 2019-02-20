@@ -79,7 +79,27 @@ public class Main extends AppCompatActivity implements View.OnClickListener{
 
         pref=getApplicationContext().getSharedPreferences("photoNum",MODE_PRIVATE);
         editor=pref.edit();
-    }
+
+        //open camera when opened from notification
+        if("openCamera".equals(getIntent().getAction())){
+            if(ContextCompat.checkSelfPermission(this
+                    , Manifest.permission.CAMERA)!= PackageManager.PERMISSION_GRANTED){
+                ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CAMERA},1);
+                Toast.makeText(this,"Enable permission in Setting->App",Toast.LENGTH_SHORT).show();
+            }//check if storage permission is granted
+            else if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+            {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 2);
+            }
+            else {
+                try {
+                    dispatchTakePictureIntent();
+                } catch (IOException e){
+
+                }
+            }
+        }
+    }//onCreate()
 
     @Override
     public void onResume(){
@@ -148,11 +168,12 @@ public class Main extends AppCompatActivity implements View.OnClickListener{
     public void onClick(View v){
         switch(v.getId()) {
             case R.id.camera:
+                //Check if camera permission is granted
                 if(ContextCompat.checkSelfPermission(this
                         , Manifest.permission.CAMERA)!= PackageManager.PERMISSION_GRANTED){
                     ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CAMERA},1);
                     Toast.makeText(this,"Enable permission in Setting->App",Toast.LENGTH_SHORT).show();
-                }
+                }//check if storage permission is granted
                 else if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
                 {
                     ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 2);

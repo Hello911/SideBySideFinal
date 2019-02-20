@@ -65,8 +65,6 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
     ImageView saveCollage;
     ImageView shareCollage;
     ImageView calculateDifference;
-    ImageView rotatePhoto1;
-    ImageView rotatePhoto2;
     RelativeLayout viewGroup;
     RelativeLayout viewGroupLandscape;
     File file;//file path of the collage last taken
@@ -139,12 +137,6 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
 
         calculateDifference=(ImageView) findViewById(R.id.calculateDifference);
         calculateDifference.setOnClickListener(this);
-
-        rotatePhoto1=(ImageView) findViewById(R.id.rotatePhoto1);
-        rotatePhoto1.setOnClickListener(this);
-
-        rotatePhoto2=(ImageView) findViewById(R.id.rotatePhoto2);
-        rotatePhoto2.setOnClickListener(this);
 
         selectPhoto1=(ImageView)findViewById(R.id.selectPhoto1);
         selectPhoto1.setOnClickListener(this);
@@ -394,12 +386,6 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
                 Intent pickPhoto2 = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 startActivityForResult(pickPhoto2, PICK_PHOTO2);
                 return true;
-            case R.id.rotatePhoto1:
-                photo1.setRotation(photo1.getRotation() + 90);
-                return true;
-            case R.id.rotatePhoto2:
-                photo2.setRotation(photo2.getRotation() + 90);
-                return true;
             case R.id.done:
                 if(uri1!=null&&uri2!=null) {
                     try {
@@ -522,12 +508,6 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
                 }else{
                     Toast.makeText(Compare.this,"Cannot calculate days elapsed. Make sure you have picked both photos.",Toast.LENGTH_SHORT).show();
                 }
-                break;
-            case R.id.rotatePhoto1:
-                photo1.setRotation(photo1.getRotation() + 90);
-                break;
-            case R.id.rotatePhoto2:
-                photo2.setRotation(photo2.getRotation() + 90);
                 break;
             case R.id.selectPhoto1:
                 Intent pickPhoto1 = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);

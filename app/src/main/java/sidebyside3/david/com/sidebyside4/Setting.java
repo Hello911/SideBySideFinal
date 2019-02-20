@@ -89,7 +89,7 @@ public class Setting extends AppCompatActivity implements View.OnClickListener, 
         PendingIntent pendingIntent=PendingIntent.getBroadcast(this
                 ,0
                 ,intent1
-                ,0);
+                ,PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager am=(AlarmManager)this.getSystemService(this.ALARM_SERVICE);
 
         Calendar calendar=Calendar.getInstance();
@@ -111,7 +111,7 @@ public class Setting extends AppCompatActivity implements View.OnClickListener, 
                 ,pendingIntent);
     }
     /**
-     * Switch Listener
+     * Switch Listener for scheduling notification reminder
      */
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
         if(isChecked){
@@ -120,11 +120,14 @@ public class Setting extends AppCompatActivity implements View.OnClickListener, 
             timeSet.setTextColor(getResources().getColor(R.color.blue));
         }else{//cancel notification if the switch is off
             AlarmManager am =  (AlarmManager) getSystemService(ALARM_SERVICE);
-            Intent intent1 = new Intent(this, AlarmReceiver.class);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(this
-                    , 0
-                    , intent1
-                    , 0);
+            Intent intent1=new Intent(this,AlarmReceiver.class);
+            intent1.setAction("SCHEDULE_IT");
+            //FLAG_UPDATE_CURRENT: if the described PendingIntent already exists,
+            //keep it but replace its extra data with what is in this new Intent.
+            PendingIntent pendingIntent=PendingIntent.getBroadcast(this
+                    ,0
+                    ,intent1
+                    ,PendingIntent.FLAG_UPDATE_CURRENT);
             am.cancel(pendingIntent);
             timePickerButton.setEnabled(false);
             labelTime.setTextColor(getResources().getColor(R.color.grey));
