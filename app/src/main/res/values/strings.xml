@@ -22,4 +22,5 @@
     <string name="select2LandNote">These two buttons are for selecting photos. They are redundant when TOUCH is ENABLED. But when TOUCH is DISABLED, which is by default, you can click to select; you need these buttons.</string>
     <string name="zoomLandNote">These two buttons are for ENABLE/DISABLE zooming. If zoom is ENABLED, the button will light up.</string>
     <string name="file">/DCIM/raspberry</string>
+
 </resources>

@@ -26,11 +26,12 @@ public class MyAsyncTask extends AsyncTask<String,Void,List<GridViewItem>> imple
     List<GridViewItem> items;
     @Override
     public void run() {
-        Collections.sort(items,new CustomComparator(mContext));
+        synchronized(items) {
+            Collections.sort(items, new CustomComparator(mContext));
+        }
         Folder.adp = new MyGridAdapter(mContext, items);
         Folder.gridView.setAdapter(Folder.adp);
     }
-
 
 
     public interface AsyncResponse{
@@ -46,7 +47,15 @@ public class MyAsyncTask extends AsyncTask<String,Void,List<GridViewItem>> imple
 
     @Override
     protected List<GridViewItem> doInBackground(String... path) {
-        items = new ArrayList<GridViewItem>();
+        if(items != null) {
+            synchronized (items) {
+                items = new ArrayList<GridViewItem>();
+            }
+        }
+        else
+        {
+            items = new ArrayList<GridViewItem>();
+        }
 
         // List all the items within the folder.
         File[] files = new File(path[0]).listFiles();
@@ -57,7 +66,9 @@ public class MyAsyncTask extends AsyncTask<String,Void,List<GridViewItem>> imple
                 Bitmap image = BitmapHelper.decodeBitmapFromFile(file.getAbsolutePath(),
                         50,
                         50);
-                items.add(i, new GridViewItem(file.getAbsolutePath(), false, image, false, i));
+                synchronized (items) {
+                    items.add(i, new GridViewItem(file.getAbsolutePath(), false, image, false, i));
+                }
 
                 activity.runOnUiThread(this);//this means the method implementing Runnable interface will be executed
 

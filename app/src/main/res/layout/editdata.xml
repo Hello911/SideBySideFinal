@@ -40,20 +40,6 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="BMI"
-            android:textSize="20dp"
-            android:textColor="#FFF"/>
-
-        <EditText
-            android:id="@+id/BMI"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="BMI in kg/m^2"
-            android:inputType="number" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:text="Note"
             android:textSize="20dp"
             android:textColor="#FFF"/>

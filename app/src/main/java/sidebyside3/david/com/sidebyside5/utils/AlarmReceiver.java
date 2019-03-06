@@ -1,6 +1,7 @@
 package sidebyside3.david.com.sidebyside5.utils;
 
 import android.app.AlarmManager;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -11,6 +12,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -67,6 +69,12 @@ public class AlarmReceiver extends BroadcastReceiver {
                     .setContentTitle("Take a photo, now!")
                     .setContentText("Take a photo now, and you will see huge results.")
                     .setSound(alarmSound);
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            {
+                NotificationChannel chan = new NotificationChannel("SideBySideChannel_1", "Send push notifications fro SideBySide app", NotificationManager.IMPORTANCE_DEFAULT);
+                mNotifiyBuilder = mNotifiyBuilder.setChannelId("SideBySideChannel_1");
+                notificationManager.createNotificationChannel(chan);
+            }
             notificationManager.notify(ID, mNotifiyBuilder.build());
         }
     }
