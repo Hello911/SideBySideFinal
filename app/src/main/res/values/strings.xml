@@ -16,4 +16,5 @@
     <string name="editNote">With Edit, can you input the weight and other health info for one particular photo. You can also write a few sentences for comment on how you did. Those numerical info will be used when two photos are compared. The ENABLE TOUCH button is there because when you want to pinch/zoom you have to press it. The maker of this app wasn\'t able to properly fit a photo into the screen when the pinch/zoom enabled by default. Sorry.</string>
     <string name="compareNote">There is horizontal/vertical mode for comparing landscape/portrait photos. To select a photo to display, you can click the photo frame when the TOUCH is DISABLED or in the menu always. After you have selected two photos, you can share or save the collage.</string>
     <string name="file">/DCIM/raspberry</string>
+
 </resources>
