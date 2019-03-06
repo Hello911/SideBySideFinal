@@ -1,12 +1,10 @@
-package sidebyside3.david.com.sidebyside4;
+package sidebyside3.david.com.sidebyside5.offline;
 
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 
 import android.content.ClipData;
-import android.content.ContentResolver;
-import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -15,9 +13,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.media.ExifInterface;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -29,36 +25,28 @@ import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 
-import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 
 import java.io.File;
-import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URI;
-import java.nio.channels.FileChannel;
-import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
+
+import sidebyside3.david.com.sidebyside5.utils.MyAsyncTask;
+import sidebyside3.david.com.sidebyside5.R;
+import sidebyside3.david.com.sidebyside5.utils.MyGridAdapter;
 
 public class Folder extends Activity implements AdapterView.OnItemClickListener
         ,View.OnClickListener{

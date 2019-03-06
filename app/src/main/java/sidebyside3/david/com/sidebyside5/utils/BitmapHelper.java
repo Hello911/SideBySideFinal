@@ -1,4 +1,4 @@
-package sidebyside3.david.com.sidebyside4;
+package sidebyside3.david.com.sidebyside5.utils;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;

@@ -1,4 +1,4 @@
-package sidebyside3.david.com.sidebyside4;
+package sidebyside3.david.com.sidebyside5.utils;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
@@ -7,16 +7,18 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
-import android.util.Log;
-import android.widget.GridView;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import sidebyside3.david.com.sidebyside5.offline.Folder;
+import sidebyside3.david.com.sidebyside5.offline.GridViewItem;
+import sidebyside3.david.com.sidebyside5.utils.BitmapHelper;
+import sidebyside3.david.com.sidebyside5.utils.CustomComparator;
+import sidebyside3.david.com.sidebyside5.utils.MyGridAdapter;
 
 public class MyAsyncTask extends AsyncTask<String,Void,List<GridViewItem>> implements Runnable{
     private Context mContext;

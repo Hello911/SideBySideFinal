@@ -1,4 +1,4 @@
-package sidebyside3.david.com.sidebyside4;
+package sidebyside3.david.com.sidebyside5.offline;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -15,6 +15,9 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 
 import java.util.Calendar;
+
+import sidebyside3.david.com.sidebyside5.R;
+import sidebyside3.david.com.sidebyside5.utils.AlarmReceiver;
 
 public class Setting extends AppCompatActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener{
     LinearLayout timePickerButton;

@@ -1,19 +1,12 @@
-package sidebyside3.david.com.sidebyside4;
+package sidebyside3.david.com.sidebyside5.utils;
 
 
-import android.annotation.TargetApi;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.media.ExifInterface;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Process;
 import android.provider.MediaStore;
-import android.support.v4.content.FileProvider;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,12 +15,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
+import sidebyside3.david.com.sidebyside5.offline.GridViewItem;
+import sidebyside3.david.com.sidebyside5.R;
 
 
 /**

@@ -1,11 +1,11 @@
-package sidebyside3.david.com.sidebyside4;
+package sidebyside3.david.com.sidebyside5.offline;
 import android.annotation.TargetApi;
 import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,18 +14,15 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.support.media.ExifInterface;
-import android.media.Image;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -48,6 +45,7 @@ import java.util.Date;
 import java.util.List;
 
 import in.goodiebag.carouselpicker.CarouselPicker;
+import sidebyside3.david.com.sidebyside5.R;
 
 /**
  * Created by Gongwei (David) Chen on 6/8/2018.
@@ -64,7 +62,6 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
     ImageView selectPhoto2;
     ImageView saveCollage;
     ImageView shareCollage;
-    ImageView calculateDifference;
     RelativeLayout viewGroup;
     RelativeLayout viewGroupLandscape;
     File file;//file path of the collage last taken
@@ -110,6 +107,8 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
     //landscape equivalent of enableZooming but is instead imageView
     ImageView enableZoomingLandscape1;
     ImageView enableZoomingLandscape2;
+
+    ImageView help;
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -134,9 +133,6 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
 
         shareCollage=(ImageView)findViewById(R.id.share_collage);
         shareCollage.setOnClickListener(this);
-
-        calculateDifference=(ImageView) findViewById(R.id.calculateDifference);
-        calculateDifference.setOnClickListener(this);
 
         selectPhoto1=(ImageView)findViewById(R.id.selectPhoto1);
         selectPhoto1.setOnClickListener(this);
@@ -251,6 +247,9 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
         enableZoomingLandscape1.setOnClickListener(this);
         enableZoomingLandscape2=(ImageView)findViewById(R.id.enableZoomingLandscape2);
         enableZoomingLandscape2.setOnClickListener(this);
+
+        help=(ImageView)findViewById(R.id.helpComparisonLand);
+        help.setOnClickListener(this);
     }
 
     /**
@@ -404,8 +403,12 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
                     Toast.makeText(this,"Make sure you have picked both photos.",Toast.LENGTH_SHORT).show();
                 }
                 return true;
+            case R.id.helpComparison:
+                Intent showNote=new Intent(this, HelpComparison.class);
+                startActivity(showNote);
+                return true;
             default:
-                // If we got here, the user's action was not recognized.
+                // If we get here, the user's action was not recognized.
                 // Invoke the superclass to handle it.
                 return super.onOptionsItemSelected(item);
 
@@ -488,27 +491,6 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
                         });
                 collageDialog2.create().show();
                 break;
-            case R.id.calculateDifference:
-                if(uri1!=null&&uri2!=null) {
-                    try {
-                        List<CarouselPicker.PickerItem> textItemsLandscape = new ArrayList<>();
-                        textItemsLandscape.add(new CarouselPicker.TextItem(getDateDifference(uri1, uri2)+"days", 30));
-                        textItemsLandscape.add(new CarouselPicker.TextItem(getDifference(0)+"lbs", 30));
-
-                        textItemsLandscape.add(new CarouselPicker.TextItem(getDifference(2)+"BMI", 30));
-                        textItemsLandscape.add(new CarouselPicker.TextItem(getDifference(1)+"ins", 30));
-
-                        CarouselPicker.CarouselViewAdapter textAdapterLandscape = new CarouselPicker.CarouselViewAdapter
-                                (this, textItemsLandscape, 0);
-                        textAdapterLandscape.setTextColor(Color.MAGENTA);
-                        carouselPickerLandscape.setAdapter(textAdapterLandscape);
-                    }catch (NullPointerException e){
-                        e.printStackTrace();
-                    }
-                }else{
-                    Toast.makeText(Compare.this,"Cannot calculate days elapsed. Make sure you have picked both photos.",Toast.LENGTH_SHORT).show();
-                }
-                break;
             case R.id.selectPhoto1:
                 Intent pickPhoto1 = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 startActivityForResult(pickPhoto1, PICK_PHOTO1);
@@ -585,6 +567,9 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
                     photo2.setOnTouchListener(this);
                 }
                 break;
+            case R.id.helpComparisonLand:
+                Intent showNote=new Intent(this, HelpComparison.class);
+                startActivity(showNote);
         }
     }
 
@@ -651,14 +636,25 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
             //if uri2 is already picked, calculate difference
             if(uri1!=null&&uri2!=null) {
                 try {
-                    List<CarouselPicker.PickerItem> textItems = new ArrayList<>();
-                    textItems.add(new CarouselPicker.TextItem(getDateDifference(uri1, uri2)+"days", 20));
-                    textItems.add(new CarouselPicker.TextItem(getDifference(0)+"lbs", 20));
-                    textItems.add(new CarouselPicker.TextItem(getDifference(2)+"BMI", 20));
-                    textItems.add(new CarouselPicker.TextItem(getDifference(1)+"ins", 20));
-                    CarouselPicker.CarouselViewAdapter textAdapter = new CarouselPicker.CarouselViewAdapter(this, textItems, 0);
-                    textAdapter.setTextColor(Color.MAGENTA);
-                    carouselPicker.setAdapter(textAdapter);
+                        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
+                            List<CarouselPicker.PickerItem> textItems = new ArrayList<>();
+                            textItems.add(new CarouselPicker.TextItem(getDateDifference(uri1, uri2)+"days", 20));
+                            textItems.add(new CarouselPicker.TextItem(getDifference(0)+"lbs", 20));
+                            textItems.add(new CarouselPicker.TextItem(getDifference(2)+"BMI", 20));
+                            textItems.add(new CarouselPicker.TextItem(getDifference(1)+"ins", 20));
+                            CarouselPicker.CarouselViewAdapter textAdapter = new CarouselPicker.CarouselViewAdapter(this, textItems, 0);
+                            textAdapter.setTextColor(Color.MAGENTA);
+                            carouselPicker.setAdapter(textAdapter);
+                        }else{
+                            List<CarouselPicker.PickerItem> textItems = new ArrayList<>();
+                            textItems.add(new CarouselPicker.TextItem(getDateDifference(uri1, uri2)+"days", 30));
+                            textItems.add(new CarouselPicker.TextItem(getDifference(0)+"lbs", 30));
+                            textItems.add(new CarouselPicker.TextItem(getDifference(2)+"BMI", 30));
+                            textItems.add(new CarouselPicker.TextItem(getDifference(1)+"ins", 30));
+                            CarouselPicker.CarouselViewAdapter textAdapter = new CarouselPicker.CarouselViewAdapter(this, textItems, 0);
+                            textAdapter.setTextColor(Color.MAGENTA);
+                            carouselPickerLandscape.setAdapter(textAdapter);
+                        }
                 }catch (NullPointerException e){
                     e.printStackTrace();
                 }
@@ -699,14 +695,25 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
 
             if(uri1!=null&&uri2!=null) {
                 try {
-                    List<CarouselPicker.PickerItem> textItems = new ArrayList<>();
-                    textItems.add(new CarouselPicker.TextItem(getDateDifference(uri1, uri2)+"days", 20));
-                    textItems.add(new CarouselPicker.TextItem(getDifference(0)+"lbs", 20));
-                    textItems.add(new CarouselPicker.TextItem(getDifference(2)+"BMI", 20));
-                    textItems.add(new CarouselPicker.TextItem(getDifference(1)+"ins", 20));
-                    CarouselPicker.CarouselViewAdapter textAdapter = new CarouselPicker.CarouselViewAdapter(this, textItems, 0);
-                    textAdapter.setTextColor(Color.MAGENTA);
-                    carouselPicker.setAdapter(textAdapter);
+                    if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
+                        List<CarouselPicker.PickerItem> textItems = new ArrayList<>();
+                        textItems.add(new CarouselPicker.TextItem(getDateDifference(uri1, uri2)+"days", 20));
+                        textItems.add(new CarouselPicker.TextItem(getDifference(0)+"lbs", 20));
+                        textItems.add(new CarouselPicker.TextItem(getDifference(2)+"BMI", 20));
+                        textItems.add(new CarouselPicker.TextItem(getDifference(1)+"ins", 20));
+                        CarouselPicker.CarouselViewAdapter textAdapter = new CarouselPicker.CarouselViewAdapter(this, textItems, 0);
+                        textAdapter.setTextColor(Color.MAGENTA);
+                        carouselPicker.setAdapter(textAdapter);
+                    }else{
+                        List<CarouselPicker.PickerItem> textItems = new ArrayList<>();
+                        textItems.add(new CarouselPicker.TextItem(getDateDifference(uri1, uri2)+"days", 30));
+                        textItems.add(new CarouselPicker.TextItem(getDifference(0)+"lbs", 30));
+                        textItems.add(new CarouselPicker.TextItem(getDifference(2)+"BMI", 30));
+                        textItems.add(new CarouselPicker.TextItem(getDifference(1)+"ins", 30));
+                        CarouselPicker.CarouselViewAdapter textAdapter = new CarouselPicker.CarouselViewAdapter(this, textItems, 0);
+                        textAdapter.setTextColor(Color.MAGENTA);
+                        carouselPickerLandscape.setAdapter(textAdapter);
+                    }
                 }catch (NullPointerException e){
                     e.printStackTrace();
                 }

@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "858012493237",
+    "firebase_url": "https://side-by-side-eb2a2.firebaseio.com",
+    "project_id": "side-by-side-eb2a2",
+    "storage_bucket": "side-by-side-eb2a2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:858012493237:android:c27f44d54e1ce466",
+        "android_client_info": {
+          "package_name": "sidebyside3.david.com.sidebyside5"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "858012493237-q7nj0c2348th6692cm8c416ckh41e127.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "sidebyside3.david.com.sidebyside5",
+            "certificate_hash": "cab21b3b8252935635ee0f2a3c45fbf2ee4b136e"
+          }
+        },
+        {
+          "client_id": "858012493237-scamla3j4n47ilnjd280q5813k60garc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDuPlox0mnH07rly9JzDVpgVvOESYraf2A"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "858012493237-scamla3j4n47ilnjd280q5813k60garc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

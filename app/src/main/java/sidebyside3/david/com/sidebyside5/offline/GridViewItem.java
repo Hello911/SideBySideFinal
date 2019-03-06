@@ -1,4 +1,4 @@
-package sidebyside3.david.com.sidebyside4;
+package sidebyside3.david.com.sidebyside5.offline;
 
 import android.graphics.Bitmap;
 

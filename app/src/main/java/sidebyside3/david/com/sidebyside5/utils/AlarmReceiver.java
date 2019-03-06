@@ -1,6 +1,5 @@
-package sidebyside3.david.com.sidebyside4;
+package sidebyside3.david.com.sidebyside5.utils;
 
-import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -14,14 +13,13 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import android.widget.Toast;
 
-import java.security.cert.PolicyNode;
 import java.util.Calendar;
 
+import sidebyside3.david.com.sidebyside5.offline.Main;
+import sidebyside3.david.com.sidebyside5.R;
+
 import static android.content.Context.MODE_PRIVATE;
-import static android.content.Intent.ACTION_BOOT_COMPLETED;
-import static android.content.Intent.ACTION_LOCKED_BOOT_COMPLETED;
 
 /**
  * Create notification object when this class receives the pending intent

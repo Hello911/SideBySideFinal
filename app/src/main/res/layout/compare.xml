@@ -37,13 +37,6 @@
             android:src="@drawable/share"
             android:layout_marginBottom="10dp"/>
         <ImageView
-            android:id="@+id/calculateDifference"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/done"
-            android:layout_marginBottom="10dp"/>
-
-        <ImageView
             android:id="@+id/rotatePhoto1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -79,7 +72,12 @@
             android:layout_height="wrap_content"
             android:src="@drawable/touch"
             android:layout_marginBottom="10dp"/>
-
+        <ImageView
+            android:id="@+id/helpComparisonLand"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/help"
+            android:layout_marginBottom="10dp"/>
     </LinearLayout>
     <!--The actual things that are showing-->
     <RelativeLayout

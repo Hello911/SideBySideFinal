@@ -1,12 +1,9 @@
-package sidebyside3.david.com.sidebyside4;
+package sidebyside3.david.com.sidebyside5.offline;
 
 import android.Manifest;
-import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Environment;
@@ -20,29 +17,25 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
 
-import tourguide.tourguide.TourGuide;
+import sidebyside3.david.com.sidebyside5.BuildConfig;
+import sidebyside3.david.com.sidebyside5.R;
+import sidebyside3.david.com.sidebyside5.online.Login;
+import sidebyside3.david.com.sidebyside5.online.Space;
+
 
 public class Main extends AppCompatActivity implements View.OnClickListener{
     static final int  CAMERA=1;
     ImageView camera,edit,setting,compare,help;
     TextView dailyPhotos;
-    Button folder;
+    Button folder,login;
     File mCurrentPhotoFile;
     Uri imageUri;
     SharedPreferences pref;
@@ -76,6 +69,9 @@ public class Main extends AppCompatActivity implements View.OnClickListener{
 
         compare=(ImageView)findViewById(R.id.compare);
         compare.setOnClickListener(this);
+
+        login=(Button)findViewById(R.id.login);
+        login.setOnClickListener(this);
 
         pref=getApplicationContext().getSharedPreferences("photoNum",MODE_PRIVATE);
         editor=pref.edit();
@@ -206,6 +202,10 @@ public class Main extends AppCompatActivity implements View.OnClickListener{
             case R.id.help:
                 Intent showNote=new Intent(this, Help.class);
                 startActivity(showNote);
+                break;
+            case R.id.login:
+                Intent openLogin=new Intent(this,Login.class);
+                startActivity(openLogin);
         }
     }
 
@@ -218,7 +218,7 @@ public class Main extends AppCompatActivity implements View.OnClickListener{
         mCurrentPhotoFile=new File(getPublicDir(),"SideBySide4_"+dateString+".png");
         Intent intent=new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         imageUri=FileProvider.getUriForFile(this
-                                ,BuildConfig.APPLICATION_ID+".provider"
+                                , BuildConfig.APPLICATION_ID+".provider"
                                 ,mCurrentPhotoFile);
         intent.putExtra(MediaStore.EXTRA_OUTPUT,imageUri);
         this.startActivityForResult(intent,CAMERA);

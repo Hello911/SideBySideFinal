@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="sidebyside3.david.com.sidebyside4.Main">
+    tools:context="sidebyside3.david.com.sidebyside5.offline.Main">
 
     <TextView
         android:id="@+id/dailyPhotos"
@@ -34,9 +34,20 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:layout_centerHorizontal="true"
-            android:layout_above="@id/setting"
+            android:layout_above="@id/login"
             android:text="50 photos in Folder"
             android:backgroundTint="@color/blue"
+            android:textColor="@color/white"
+            android:textSize="20sp"/>
+        <Button
+            android:id="@+id/login"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_centerHorizontal="true"
+            android:layout_above="@id/setting"
+            android:text="Anonymous share space"
+            android:backgroundTint="@color/green"
             android:textColor="@color/white"
             android:textSize="20sp"/>
         <ImageView
