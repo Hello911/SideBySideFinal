@@ -1,23 +1,29 @@
 package sidebyside3.david.com.sidebyside5.offline;
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.graphics.drawable.ColorDrawable;
 import android.media.ExifInterface;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -31,23 +37,21 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.jjoe64.graphview.series.DataPoint;
-import com.jjoe64.graphview.series.LineGraphSeries;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import app.akexorcist.bluetotohspp.library.BluetoothSPP;
-import app.akexorcist.bluetotohspp.library.BluetoothState;
 import in.goodiebag.carouselpicker.CarouselPicker;
 import sidebyside3.david.com.sidebyside5.R;
 
@@ -59,7 +63,6 @@ public class Edit extends AppCompatActivity implements View.OnTouchListener, Vie
     CarouselPicker carouselPicker;
     String dataArray[];
     Uri uri;
-    BluetoothSPP spp;
 
     //DRAGGING & ZOOMING
     private static final int NONE = 0;
@@ -75,6 +78,11 @@ public class Edit extends AppCompatActivity implements View.OnTouchListener, Vie
     private Bitmap bmap;
     private float oldDist = 1f;
 
+    //edit data layout views. For getting number from text field in onPermission
+    EditText mWeight;
+    EditText mHeight;
+    EditText mNote;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,10 +97,10 @@ public class Edit extends AppCompatActivity implements View.OnTouchListener, Vie
         carouselPicker = (CarouselPicker) findViewById(R.id.carousel);
         List<CarouselPicker.PickerItem> textItems = new ArrayList<>();
         //20 here represents the textSize in dp, change it to the value you want.
-        textItems.add(new CarouselPicker.TextItem("days", 20));
-        textItems.add(new CarouselPicker.TextItem("pounds", 20));
-        textItems.add(new CarouselPicker.TextItem("inches", 20));
-        textItems.add(new CarouselPicker.TextItem("BMIs", 20));
+        textItems.add(new CarouselPicker.TextItem("date", 20));
+        textItems.add(new CarouselPicker.TextItem("weight", 20));
+        textItems.add(new CarouselPicker.TextItem("BMI", 20));
+        textItems.add(new CarouselPicker.TextItem("height", 20));
         CarouselPicker.CarouselViewAdapter textAdapter = new CarouselPicker.CarouselViewAdapter(this, textItems, 0);
         textAdapter.setTextColor(Color.MAGENTA);
         carouselPicker.setAdapter(textAdapter);
@@ -103,6 +111,18 @@ public class Edit extends AppCompatActivity implements View.OnTouchListener, Vie
         enableZooming=(Button)findViewById(R.id.enableZooming);
         enableZooming.setOnClickListener(this);
 
+        /**Relaunching to remember choice for orientation change
+         *Need to convert from filePath to uri because security problem with sending uri with Intent
+         */
+        Intent retrievePhotos = getIntent();
+        String photoPath = retrievePhotos.getStringExtra("photo");
+        if (photoPath != null) {
+            Bitmap bitmap = BitmapFactory.decodeFile(photoPath);
+            photo.setImageBitmap(bitmap);
+            //read photo exif data from global uri variable
+            uri=Compare.getImageContentUri(this, new File(photoPath));
+            updateCarousel();
+        }
     }
 
     /**
@@ -121,7 +141,6 @@ public class Edit extends AppCompatActivity implements View.OnTouchListener, Vie
     ExecutorService threadKiller = Executors.newSingleThreadExecutor();
     Future futureThread;
     Handler mHandler=new Handler();
-    private LineGraphSeries<DataPoint> mSeries1;
     private int[] voltagePts=new int[40];
     private double lastTime=0;
     /**
@@ -134,8 +153,13 @@ public class Edit extends AppCompatActivity implements View.OnTouchListener, Vie
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.selectPhoto:
-                Intent pickPhoto1 = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(pickPhoto1, PICK_PHOTO);
+                if(ContextCompat.checkSelfPermission(this
+                        , Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
+                    ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
+                }else{//if granted, goes here
+                    Intent pickPhoto1 = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    startActivityForResult(pickPhoto1, PICK_PHOTO);
+                }
                 break;
             case R.id.seeComment:
                 if(uri!=null) {
@@ -158,6 +182,9 @@ public class Edit extends AppCompatActivity implements View.OnTouchListener, Vie
                     final EditText height = (EditText) view.findViewById(R.id.height);
                     final EditText note = (EditText) view.findViewById(R.id.note);
 
+                    mWeight=weight;
+                    mHeight=height;
+                    mNote=note;
 
                     AlertDialog.Builder exifDialog = new AlertDialog.Builder(this)
                             .setTitle("Edit Health Data")
@@ -191,15 +218,31 @@ public class Edit extends AppCompatActivity implements View.OnTouchListener, Vie
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                         Toast.makeText(Edit.this, "Oops, an error prevents saving: "+e.getMessage(), Toast.LENGTH_SHORT).show();
-
                                     }
-                                }//onClick()
+                            }//onClick()
                             });
                     exifDialog.create().show();
                 } else
                     Toast.makeText(this, "Select a photo first to see note.", Toast.LENGTH_SHORT).show();
         }//switch
         return true;
+    }
+    /**
+     * Once permission is granted, do these things corresponding to each requestCode
+     * @param requestCode
+     * @param permissions
+     * @param grantResults
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case 1://select photo
+                if(grantResults.length>0&&grantResults[0]==PackageManager.PERMISSION_GRANTED){
+                    Intent pickPhoto1 = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    startActivityForResult(pickPhoto1, PICK_PHOTO);
+                }
+                break;
+        }
     }
     /**
      * Handle after user picks the photo
@@ -214,29 +257,12 @@ public class Edit extends AppCompatActivity implements View.OnTouchListener, Vie
         if (requestCode == PICK_PHOTO && resultCode == RESULT_OK && data != null && data.getData() != null) {
 
             uri = data.getData();
-            //Display photo
-            try {
-                Bitmap bitmap1 = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-                photo.setImageBitmap(bitmap1);
+            //relaunch to remember its choice in case of orientation change
+            finish();//other wise back button need to be pressed twice
+            Intent relaunch=new Intent(this,Edit.class);
+            relaunch.putExtra("photo",getUriRealPath(this,uri));
+            startActivity(relaunch);
 
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            //read photo exif data
-            updateCarousel();
-        }
-        if (requestCode == BluetoothState.REQUEST_CONNECT_DEVICE) {
-            if (resultCode == Activity.RESULT_OK)
-                spp.connect(data);
-        } else if (requestCode == BluetoothState.REQUEST_ENABLE_BT) {
-            if (resultCode == Activity.RESULT_OK) {
-                spp.setupService();
-            } else {
-                Toast.makeText(this
-                        , "Bluetooth was not enabled."
-                        , Toast.LENGTH_SHORT).show();
-                finish();
-            }
         }
     }//OnActivityResult() ends
 
@@ -266,8 +292,8 @@ public class Edit extends AppCompatActivity implements View.OnTouchListener, Vie
                 List<CarouselPicker.PickerItem> textItems = new ArrayList<>();
                 textItems.add(new CarouselPicker.TextItem((String) getDate(uri), 15));
                 textItems.add(new CarouselPicker.TextItem(dataArray[0] + "lbs", 15));
-                textItems.add(new CarouselPicker.TextItem(dataArray[1] + "ins", 15));
                 textItems.add(new CarouselPicker.TextItem(dataArray[2] + "BMIs", 15));
+                textItems.add(new CarouselPicker.TextItem(dataArray[1] + "ins", 15));
                 CarouselPicker.CarouselViewAdapter textAdapter = new CarouselPicker.CarouselViewAdapter(this, textItems, 0);
                 textAdapter.setTextColor(Color.MAGENTA);
                 carouselPicker.setAdapter(textAdapter);

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/upLoad"
+        android:icon="@drawable/add"
+        android:title="Upload photo"
+        app:showAsAction="always" />
+
+    <item android:id="@+id/signOut"
+        android:icon="@drawable/sign_out"
+        android:title="Sign Out"
+        app:showAsAction="always" />
+
+</menu>

@@ -40,6 +40,16 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:text="BMI(kg/m^2)"
+            android:textSize="20dp"
+            android:textColor="#FFF"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="BMI=weight/height^2*703" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:text="Note"
             android:textSize="20dp"
             android:textColor="#FFF"/>

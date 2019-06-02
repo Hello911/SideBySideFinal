@@ -1,8 +1,8 @@
 package sidebyside3.david.com.sidebyside5.offline;
 
-import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
@@ -12,31 +12,24 @@ import me.relex.circleindicator.CircleIndicator;
 import sidebyside3.david.com.sidebyside5.R;
 import sidebyside3.david.com.sidebyside5.utils.MyAdapter;
 
-public class Help extends AppCompatActivity implements View.OnClickListener{
+public class helpOutline extends AppCompatActivity implements View.OnClickListener{
+    Button skip;
     private static ViewPager mPager;
     private ArrayList<Integer> XPHOTO=new ArrayList<Integer>();
-    private static final Integer[] XPHOTOArray={R.drawable.x_daily_photo
-            ,R.drawable.x_folder
-            ,R.drawable.x_outline_camera
-            ,R.drawable.x_setting
-            ,R.drawable.x_camera
-            ,R.drawable.x_edit
-            ,R.drawable.x_compare};
-    private ArrayList<Integer> notesText=new ArrayList<Integer>();
-    private static final Integer[] notesTextArray={R.string.photoCountNote
-            ,R.string.folderNote
-            ,R.string.outline_cameraNote
-            ,R.string.settingNote
-            ,R.string.cameraNote
-            ,R.string.editNote
-            ,R.string.compareNote};
-    Button skip;
+    private static final Integer[] XPHOTOArray={R.drawable.x_best_outline
+            ,R.drawable.x_shutter
+            ,R.drawable.x_timer};
+    private ArrayList<Integer> notesText=new ArrayList<>();
+    private static final Integer[] notesTextArray={R.string.bestOutline
+            ,R.string.shutter
+            ,R.string.timer};
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.help);
+        setContentView(R.layout.help_outline);
         init();
     }
+
     private void init(){
         for(int i=0;i<XPHOTOArray.length;i++){
             XPHOTO.add(XPHOTOArray[i]);
@@ -51,7 +44,6 @@ public class Help extends AppCompatActivity implements View.OnClickListener{
         skip=(Button)findViewById(R.id.skip);
         skip.setOnClickListener(this);
     }
-
 
     @Override
     public void onClick(View view) {

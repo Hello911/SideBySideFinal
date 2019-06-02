@@ -6,8 +6,8 @@ android {
         applicationId "sidebyside3.david.com.sidebyside5"
         minSdkVersion 15
         targetSdkVersion 26
-        versionCode 4
-        versionName "4.0"
+        versionCode 11
+        versionName "99 Red Balloons+"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -24,15 +24,12 @@ dependencies {
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
     implementation 'com.android.support:support-v4:26.1.0'
     implementation 'com.google.firebase:firebase-auth:11.0.4'
+    implementation 'com.google.firebase:firebase-database:11.0.4'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     /*For View adapter tabs*/
     implementation 'com.android.support:design:26.1.0'
-    /*graph view lib*/
-    implementation 'com.jjoe64:graphview:4.2.2'
-    /*Bluetooth library*/
-    implementation 'com.akexorcist:bluetoothspp:1.0.0'
     //GoodieBag CarouselPicker
     implementation 'com.github.GoodieBag:CarouselPicker:v1.1'
     //FAB
@@ -42,6 +39,8 @@ dependencies {
     compile 'me.relex:circleindicator:1.2.2@aar'
     //Firebase
     implementation 'com.google.firebase:firebase-core:16.0.1'
+
+    compile project(path: ':openCVLibrary24132')
 }
 //Firebase
 apply plugin: 'com.google.gms.google-services'

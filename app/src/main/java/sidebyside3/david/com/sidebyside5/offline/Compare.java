@@ -1,10 +1,13 @@
 package sidebyside3.david.com.sidebyside5.offline;
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.content.ActivityNotFoundException;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -13,12 +16,16 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.PointF;
+import android.os.Build;
+import android.provider.DocumentsContract;
 import android.support.media.ExifInterface;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -38,6 +45,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Target;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -221,16 +229,26 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
             }catch(NullPointerException e) {
                 e.printStackTrace();
             }
-            if(uri1!=null&&uri2!=null) {
+            if(uri1!=null&&uri2!=null) {//show difference
                 try {
                     List<CarouselPicker.PickerItem> textItems = new ArrayList<>();
-                    textItems.add(new CarouselPicker.TextItem(getDateDifference(uri1, uri2)+"days", 20));
-                    textItems.add(new CarouselPicker.TextItem(getDifference(0)+"lbs", 20));
-                    textItems.add(new CarouselPicker.TextItem(getDifference(2)+"BMI", 20));
-                    textItems.add(new CarouselPicker.TextItem(getDifference(1)+"ins", 20));
-                    CarouselPicker.CarouselViewAdapter textAdapterZ = new CarouselPicker.CarouselViewAdapter(this, textItems, 0);
-                    textAdapterZ.setTextColor(Color.MAGENTA);
-                    carouselPicker.setAdapter(textAdapterZ);
+                    if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                        textItems.add(new CarouselPicker.TextItem(getDateDifference(uri1, uri2) + "days", 20));
+                        textItems.add(new CarouselPicker.TextItem(getDifference(0) + "lbs", 20));
+                        textItems.add(new CarouselPicker.TextItem(getDifference(2) + "BMI", 20));
+                        textItems.add(new CarouselPicker.TextItem(getDifference(1) + "ins", 20));
+                        CarouselPicker.CarouselViewAdapter textAdapterZ = new CarouselPicker.CarouselViewAdapter(this, textItems, 0);
+                        textAdapterZ.setTextColor(Color.MAGENTA);
+                        carouselPicker.setAdapter(textAdapterZ);
+                    }else{
+                        textItems.add(new CarouselPicker.TextItem(getDateDifference(uri1, uri2) + "days", 30));
+                        textItems.add(new CarouselPicker.TextItem(getDifference(0) + "lbs", 30));
+                        textItems.add(new CarouselPicker.TextItem(getDifference(2) + "BMI", 30));
+                        textItems.add(new CarouselPicker.TextItem(getDifference(1) + "ins", 30));
+                        CarouselPicker.CarouselViewAdapter textAdapterZ = new CarouselPicker.CarouselViewAdapter(this, textItems, 0);
+                        textAdapterZ.setTextColor(Color.MAGENTA);
+                        carouselPickerLandscape.setAdapter(textAdapterZ);
+                    }
                 }catch (NullPointerException e){
                     e.printStackTrace();
                 }
@@ -251,7 +269,30 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
         help=(ImageView)findViewById(R.id.helpComparisonLand);
         help.setOnClickListener(this);
     }
-
+    /**
+     * Once permission is granted, do these things corresponding to each requestCode
+     * @param requestCode
+     * @param permissions
+     * @param grantResults
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults){
+        switch(requestCode){
+            case 1://select photo1
+                if(grantResults.length>0&&grantResults[0]== PackageManager.PERMISSION_GRANTED){
+                    Intent pickPhoto1 = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    startActivityForResult(pickPhoto1, PICK_PHOTO1);
+                }
+                break;
+            case 2://select photo2
+                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                {
+                    Intent pickPhoto2 = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    startActivityForResult(pickPhoto2, PICK_PHOTO2);
+                }
+                break;
+        }
+    }
     /**
      * used when opening Compare from Folder
      * @param context
@@ -302,8 +343,8 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
         List<CarouselPicker.PickerItem> dataItems=new ArrayList<>();
         dataItems.add(new CarouselPicker.TextItem("date",fontSize));
         dataItems.add(new CarouselPicker.TextItem("weight",fontSize));
-        dataItems.add(new CarouselPicker.TextItem("height",fontSize));
         dataItems.add(new CarouselPicker.TextItem("BMI",fontSize));
+        dataItems.add(new CarouselPicker.TextItem("height",fontSize));
         return dataItems;
     }
 
@@ -378,29 +419,21 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
                 collageDialog.create().show();
                 return true;
             case R.id.selectPhoto1:
-                Intent pickPhoto1 = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(pickPhoto1, PICK_PHOTO1);
+                if(ContextCompat.checkSelfPermission(this
+                        , Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
+                    ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
+                }else{//if granted, goes here
+                    Intent pickPhoto1 = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    startActivityForResult(pickPhoto1, PICK_PHOTO1);
+                }
                 return true;
             case R.id.selectPhoto2:
-                Intent pickPhoto2 = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(pickPhoto2, PICK_PHOTO2);
-                return true;
-            case R.id.done:
-                if(uri1!=null&&uri2!=null) {
-                    try {
-                        List<CarouselPicker.PickerItem> textItems = new ArrayList<>();
-                        textItems.add(new CarouselPicker.TextItem(getDateDifference(uri1, uri2)+"days", 20));
-                        textItems.add(new CarouselPicker.TextItem(getDifference(0)+"lbs", 20));
-                        textItems.add(new CarouselPicker.TextItem(getDifference(1)+"ins", 20));
-                        textItems.add(new CarouselPicker.TextItem(getDifference(2)+"BMI", 20));
-                        CarouselPicker.CarouselViewAdapter textAdapter = new CarouselPicker.CarouselViewAdapter(this, textItems, 0);
-                        textAdapter.setTextColor(Color.MAGENTA);
-                        carouselPicker.setAdapter(textAdapter);
-                    }catch (NullPointerException e){
-                        e.printStackTrace();
-                    }
-                }else{
-                    Toast.makeText(this,"Make sure you have picked both photos.",Toast.LENGTH_SHORT).show();
+                if(ContextCompat.checkSelfPermission(this
+                        , Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
+                    ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},2);
+                }else{//if granted, goes here
+                    Intent pickPhoto2 = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    startActivityForResult(pickPhoto2, PICK_PHOTO2);
                 }
                 return true;
             case R.id.helpComparison:
@@ -492,20 +525,40 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
                 collageDialog2.create().show();
                 break;
             case R.id.selectPhoto1:
-                Intent pickPhoto1 = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(pickPhoto1, PICK_PHOTO1);
+                if(ContextCompat.checkSelfPermission(this
+                        , Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
+                    ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
+                }else{//if granted, goes here
+                    Intent pickPhoto1 = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    startActivityForResult(pickPhoto1, PICK_PHOTO1);
+                }
                 break;
             case R.id.selectPhoto2:
-                Intent pickPhoto2 = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(pickPhoto2, PICK_PHOTO2);
+                if(ContextCompat.checkSelfPermission(this
+                        , Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
+                    ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},2);
+                }else{//if granted, goes here
+                    Intent pickPhoto2 = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    startActivityForResult(pickPhoto2, PICK_PHOTO2);
+                }
                 break;
             case R.id.photo1:
-                pickPhoto1 = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(pickPhoto1, PICK_PHOTO1);
+                if(ContextCompat.checkSelfPermission(this
+                        , Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
+                    ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
+                }else{//if granted, goes here
+                    Intent pickPhoto1 = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    startActivityForResult(pickPhoto1, PICK_PHOTO1);
+                }
                 break;
             case R.id.photo2:
-                pickPhoto2 = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(pickPhoto2, PICK_PHOTO2);
+                if(ContextCompat.checkSelfPermission(this
+                        , Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
+                    ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},2);
+                }else{//if granted, goes here
+                    Intent pickPhoto2 = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    startActivityForResult(pickPhoto2, PICK_PHOTO2);
+                }
                 break;
             case R.id.enableZooming1:
                 if(isEnabled1){
@@ -635,29 +688,12 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
             }
             //if uri2 is already picked, calculate difference
             if(uri1!=null&&uri2!=null) {
-                try {
-                        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
-                            List<CarouselPicker.PickerItem> textItems = new ArrayList<>();
-                            textItems.add(new CarouselPicker.TextItem(getDateDifference(uri1, uri2)+"days", 20));
-                            textItems.add(new CarouselPicker.TextItem(getDifference(0)+"lbs", 20));
-                            textItems.add(new CarouselPicker.TextItem(getDifference(2)+"BMI", 20));
-                            textItems.add(new CarouselPicker.TextItem(getDifference(1)+"ins", 20));
-                            CarouselPicker.CarouselViewAdapter textAdapter = new CarouselPicker.CarouselViewAdapter(this, textItems, 0);
-                            textAdapter.setTextColor(Color.MAGENTA);
-                            carouselPicker.setAdapter(textAdapter);
-                        }else{
-                            List<CarouselPicker.PickerItem> textItems = new ArrayList<>();
-                            textItems.add(new CarouselPicker.TextItem(getDateDifference(uri1, uri2)+"days", 30));
-                            textItems.add(new CarouselPicker.TextItem(getDifference(0)+"lbs", 30));
-                            textItems.add(new CarouselPicker.TextItem(getDifference(2)+"BMI", 30));
-                            textItems.add(new CarouselPicker.TextItem(getDifference(1)+"ins", 30));
-                            CarouselPicker.CarouselViewAdapter textAdapter = new CarouselPicker.CarouselViewAdapter(this, textItems, 0);
-                            textAdapter.setTextColor(Color.MAGENTA);
-                            carouselPickerLandscape.setAdapter(textAdapter);
-                        }
-                }catch (NullPointerException e){
-                    e.printStackTrace();
-                }
+                //Relaunch itself to remember comparison for orientation change
+                finish();
+                Intent comparePhotos=new Intent(this,Compare.class);
+                comparePhotos.putExtra("photo1", getUriRealPath(this, uri1));
+                comparePhotos.putExtra("photo2",getUriRealPath(this, uri2));
+                startActivity(comparePhotos);
             }else{
                 //wait for the other photo to be picked
             }
@@ -694,29 +730,12 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
             }
 
             if(uri1!=null&&uri2!=null) {
-                try {
-                    if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
-                        List<CarouselPicker.PickerItem> textItems = new ArrayList<>();
-                        textItems.add(new CarouselPicker.TextItem(getDateDifference(uri1, uri2)+"days", 20));
-                        textItems.add(new CarouselPicker.TextItem(getDifference(0)+"lbs", 20));
-                        textItems.add(new CarouselPicker.TextItem(getDifference(2)+"BMI", 20));
-                        textItems.add(new CarouselPicker.TextItem(getDifference(1)+"ins", 20));
-                        CarouselPicker.CarouselViewAdapter textAdapter = new CarouselPicker.CarouselViewAdapter(this, textItems, 0);
-                        textAdapter.setTextColor(Color.MAGENTA);
-                        carouselPicker.setAdapter(textAdapter);
-                    }else{
-                        List<CarouselPicker.PickerItem> textItems = new ArrayList<>();
-                        textItems.add(new CarouselPicker.TextItem(getDateDifference(uri1, uri2)+"days", 30));
-                        textItems.add(new CarouselPicker.TextItem(getDifference(0)+"lbs", 30));
-                        textItems.add(new CarouselPicker.TextItem(getDifference(2)+"BMI", 30));
-                        textItems.add(new CarouselPicker.TextItem(getDifference(1)+"ins", 30));
-                        CarouselPicker.CarouselViewAdapter textAdapter = new CarouselPicker.CarouselViewAdapter(this, textItems, 0);
-                        textAdapter.setTextColor(Color.MAGENTA);
-                        carouselPickerLandscape.setAdapter(textAdapter);
-                    }
-                }catch (NullPointerException e){
-                    e.printStackTrace();
-                }
+                //Relaunch itself to remember comparison for orientation change
+                finish();
+                Intent comparePhotos=new Intent(this,Compare.class);
+                comparePhotos.putExtra("photo1", getUriRealPath(this, uri1));
+                comparePhotos.putExtra("photo2",getUriRealPath(this, uri2));
+                startActivity(comparePhotos);
             }else{
                 //wait for the other photo to be picked
             }
@@ -725,7 +744,79 @@ public class Compare extends AppCompatActivity implements View.OnClickListener, 
 
     }//OnActivityResult() ends
 
+    /**
+     * content:// style uri for photos canNOT be used to make change back to the photo
+     * Use this method to get the REAL uri to make changes to the photo
+     * @param context
+     * @param uri
+     * @return
+     */
+    private String getUriRealPath(Context context, Uri uri){
+        String real="";
+        if(isAboveKitKat()){//from KitKat above, the uri returned is not real path uri
+            //sdk 19 (KitKat) or above
+            real=getUriRealPathAboveKitkat(context, uri);
+        }else{
+            //below sdk 19
+            real=getImageRealPath(getContentResolver(), uri, null);
+        }
+        return real;
+    }//getUriRealPath() ends
+    @TargetApi(19)
+    private String getUriRealPathAboveKitkat(Context context, Uri uri){
+        String real="";
+        if(isGooglePhotoDoc(uri.getAuthority() )){//check if uri has authority "com.google.android.apps.photos.content"
+            real=uri.getLastPathSegment();//gets the decoded last segment
+        }else{
+            real=getImageRealPath(getContentResolver(),uri,null);//ContentResolver provides access to content model
+        }
+        return real;
+    }//getUriRealPathAboveKitkat() ends
+    /**
+     * Check if current android is above Kitkat sdk 19
+     */
+    private boolean isAboveKitKat(){
+        boolean real=false;
+        real= Build.VERSION.SDK_INT>=Build.VERSION_CODES.KITKAT;
+        return real;
+    }
+    /**
+     * Check if this document is provided by google photos
+     */
+    private boolean isGooglePhotoDoc(String uriAuthority){
+        boolean ret=false;
+        if("com.google.android.apps.photos.content".equals(uriAuthority)){
+            ret=true;
+        }
+        return ret;
+    }
+    /**
+     * For sdk lower than 19(KitKat)
+     * Return uri that represent document file real local path
+     */
+    private String getImageRealPath(ContentResolver contentResolver, Uri uri, String whereClause){
+        String ret="";
+        //Query the uri with condition
+        Cursor cursor=contentResolver.query(uri,null,whereClause,null,null);
+        if(cursor!=null){
+            boolean moveToFirst=cursor.moveToFirst();
+            if(moveToFirst){
+                //Get column name by uri type
+                String columnName=MediaStore.Images.Media.DATA;
+                if(uri==MediaStore.Images.Media.EXTERNAL_CONTENT_URI){
+                    columnName=MediaStore.Images.Media.DATA;
+                }else if(uri==MediaStore.Video.Media.EXTERNAL_CONTENT_URI){
+                    columnName=MediaStore.Video.Media.DATA;
+                }
+                //get column index
+                int imageColumnIndex=cursor.getColumnIndex(columnName);
+                //get column value which is the uri related to local file path
+                ret=cursor.getString(imageColumnIndex);
 
+            }
+        }
+        return ret;
+    }
 
     /**
      * For getting the date taken of photo with that uri

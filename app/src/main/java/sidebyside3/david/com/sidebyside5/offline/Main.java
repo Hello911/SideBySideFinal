@@ -1,6 +1,7 @@
 package sidebyside3.david.com.sidebyside5.offline;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -27,8 +28,6 @@ import java.util.Calendar;
 
 import sidebyside3.david.com.sidebyside5.BuildConfig;
 import sidebyside3.david.com.sidebyside5.R;
-import sidebyside3.david.com.sidebyside5.online.Login;
-import sidebyside3.david.com.sidebyside5.online.Space;
 
 
 public class Main extends AppCompatActivity implements View.OnClickListener{
@@ -138,43 +137,58 @@ public class Main extends AppCompatActivity implements View.OnClickListener{
 
     }
 
+    /**
+     * Once permission is granted, do these things corresponding to each requestCode
+     * @param requestCode
+     * @param permissions
+     * @param grantResults
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults){
         switch(requestCode){
-            case 1:{
+            case 1://for Camera onClick
                 if(grantResults.length>0&&grantResults[0]==PackageManager.PERMISSION_GRANTED){
                     try {
                         dispatchTakePictureIntent();
                     } catch (IOException e){
 
                     }
-                }else{
-
                 }
-            }
-            case 2:
+                break;
+            case 2://for OutlineCamera onClick
                 if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
                 {
-
+                    Intent openOutlineCamera=new Intent(this,OutlineCamera.class);
+                    startActivity(openOutlineCamera);
                 }
+                break;
         }
     }
 
+    /**
+     * Sort through an array of permissions to see if any of them is not granted
+     * @param context
+     * @param permissions
+     * @return
+     */
+    public static boolean hasPermissions(Context context, String...permissions){
+        if(context!=null&&permissions!=null){
+            for(String permission:permissions){
+                if(ActivityCompat.checkSelfPermission(context,permission)!=PackageManager.PERMISSION_GRANTED){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    String[] camera_permissions={Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE};
     @Override
     public void onClick(View v){
         switch(v.getId()) {
             case R.id.camera:
-                //Check if camera permission is granted
-                if(ContextCompat.checkSelfPermission(this
-                        , Manifest.permission.CAMERA)!= PackageManager.PERMISSION_GRANTED){
-                    ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CAMERA},1);
-                    Toast.makeText(this,"Enable permission in Setting->App",Toast.LENGTH_SHORT).show();
-                }//check if storage permission is granted
-                else if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
-                {
-                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 2);
-                }
-                else {
+                if (!hasPermissions(this,camera_permissions)) {
+                    ActivityCompat.requestPermissions(this, camera_permissions,1);
+                }else{//this else statement happens for the second click, first click goes to Permission's OnResult
                     try {
                         dispatchTakePictureIntent();
                     } catch (IOException e){
@@ -203,9 +217,15 @@ public class Main extends AppCompatActivity implements View.OnClickListener{
                 Intent showNote=new Intent(this, Help.class);
                 startActivity(showNote);
                 break;
-            case R.id.login:
-                Intent openLogin=new Intent(this,Login.class);
-                startActivity(openLogin);
+            case R.id.login://for now, the login is used to open OutlineCamera
+                if(ContextCompat.checkSelfPermission(this
+                        , Manifest.permission.CAMERA)!= PackageManager.PERMISSION_GRANTED){
+                    ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CAMERA},2);
+                }else{//if granted, goes here
+                    Intent openOutlineCamera=new Intent(this,OutlineCamera.class);
+                    startActivity(openOutlineCamera);
+                }
+                break;
         }
     }
 
